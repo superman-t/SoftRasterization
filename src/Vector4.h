@@ -1,13 +1,13 @@
 //
-//  Vec4.h
+//  Vector4.h
 //  Sgraphic
 //
 //  Created by AceTian on 2017/8/1.
 //  Copyright © 2017年 AceTian. All rights reserved.
 //
 
-#ifndef Vec4_h
-#define Vec4_h
+#ifndef Vector4_h
+#define Vector4_h
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
@@ -17,12 +17,14 @@ namespace SoftRender{
 	class Vec4 {
     public:
 		T x, y, z, w;
+	public:
 		Vec4():x(T(0)), y(T(0)), z(T(0)),w(T(0)){}
 		Vec4(T _x, T _y, T _z, T _w):x(_x),y(_y),z(_z),w(_w){}
+		Vec4(T _x, T _y, T _z):x(_x), y(_y), z(_z), w(0){}
         Vec4(T xx):x(xx), y(xx), z(xx), w(xx){}
-		Vec4(Vec4<T> &v):x(v.x),y(v.y),z(v.z),w(v.w) {}
+		Vec4(const Vec4& v) {x = v.x, y = v.y, z = v.z, w = v.w;}
     
-		Vec4<T>& operator=(Vec4<T>& v){x = v.x; y = v.y;z = v.z;w = v.w; return *this;}
+		Vec4<T>& operator=(const Vec4<T>& v){x = v.x; y = v.y;z = v.z;w = v.w; return *this;}
     
 		Vec4<T> operator+(const Vec4<T>& v) const{return Vec4<T>(x + v.x, y + v.y, z + v.z, w + v.w);}
 		Vec4<T> operator-(const Vec4<T>& v) const{return Vec4<T>(x - v.x, y - v.y, z - v.z, w - v.w);}
@@ -36,10 +38,10 @@ namespace SoftRender{
 		T operator[](int i) {
 			switch (i)
 			{
-			case 1: return x;
-			case 2: return y;
-			case 3: return z;
-			case 4: return w;
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
+			case 3: return w;
 			default:return 0;
 			}
 		}
@@ -64,10 +66,10 @@ namespace SoftRender{
     
 		Vec4<T>& Normalize()
 		{
-			T len = LengthSqr();
+			T len = Length();
             if (len > 0)
             {
-                T len2 = 1/sqrt(len);
+                T len2 = 1/len;
                 x*=len2, y*=len2, z*=len2, w*=len2;
             }
 			return *this;
@@ -75,10 +77,10 @@ namespace SoftRender{
         
         friend std::ostream& operator << (std::ostream& os, const Vec4<T>& v)
         {
-            os << "[" << v.x << " " << v.y << " " << v.z << " " << v.w << "]";
+            os << "[" << v.x << " " << v.y << " " << v.z << " " << v.w << "]" << std::endl;
             return os;
         }
 	};
-    typedef Vec4<float> Vec4f;
+    
 }
 #endif /* Vec4_h */
