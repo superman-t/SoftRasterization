@@ -10,47 +10,50 @@
 #define Sgmath_hpp
 
 #include "Vector4.h"
-#include <stdio.h>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
-namespace Sr{
-	using namespace std;
+namespace SoftRender{
+    template<typename T>
 	struct SgMatrix4
 	{
-		float m[4][4];
-		SgMatrix4 ()
-		{
-			memset(m, 0, sizeof(m));
-			m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0;
-		}
+		T m[4][4];
+		SgMatrix4 (){ memset(m, 0, sizeof(m)); m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0; }
 
-		SgMatrix4(Vector4& x, Vector4& y, Vector4& z);
-		SgMatrix4(Vector4& x, Vector4& y, Vector4& z, Vector4& w);
+		SgMatrix4(Vec4<T>& x, Vec4<T>& y, Vec4<T>& z);
+		SgMatrix4(Vec4<T>& x, Vec4<T>& y, Vec4<T>& z, Vec4<T>& w);
 
-		SgMatrix4(const SgMatrix4& other);
-		SgMatrix4& operator=(const SgMatrix4& rhs);
+		SgMatrix4(const SgMatrix4<T>& other);
+		SgMatrix4<T>& operator=(const SgMatrix4<T>& rhs);
 
-		bool IsEqual(const SgMatrix4& rhs);
-		SgMatrix4 Inverse() const;
-		SgMatrix4 Transpose() const;
-		float Determinant() const;
+		bool IsEqual(const SgMatrix4<T>& rhs);
+		SgMatrix4<T> Inverse() const;
+		SgMatrix4<T> Transpose() const;
+		T Determinant() const;
 
-		bool operator== (const SgMatrix4& rhs){return this == &rhs;}
-		bool operator != (const SgMatrix4& rhs){return !operator==(rhs);}
-		float* operator[](int row){return m[row];}
-		const float* operator[] (int row)const {return m[row];}
+		bool operator== (const SgMatrix4<T>& rhs){return this == &rhs;}
+		bool operator != (const SgMatrix4<T>& rhs){return !operator==(rhs);}
+		T* operator[](int row){return m[row];}
+		const T* operator[] (int row)const {return m[row];}
+        friend SgMatrix4<T> operator * (const SgMatrix4<T> &lfs, const SgMatrix4<T> &rhs);
+        friend SgMatrix4<T> operator * (const SgMatrix4<T> &lfs, T rhs);
+        friend SgMatrix4<T> operator * (T lfs, const SgMatrix4<T> &rhs);
+        friend SgMatrix4<T> operator + (const SgMatrix4<T> &lfs, const SgMatrix4<T> &rhs);
+        friend SgMatrix4<T> operator - (const SgMatrix4<T> &lfs, const SgMatrix4<T> &rhs);
 
-		void Log();
-
+        
+    
+        friend std::ostream& operator << (std::ostream &os, const SgMatrix4 &m)
+        {
+            os << "[" <<  m[0][0] << " " <<  m[0][1] << " " <<  m[0][2] << " " <<  m[0][3] << "\n"
+            << " "<<  m[1][0] << " " <<  m[1][1] << " " <<  m[1][2] << " " <<  m[1][3] << "\n"
+            << " "<<  m[2][0] << " " <<  m[2][1] << " " <<  m[2][2] << " " <<  m[2][3] << "\n"
+            << " "<<  m[3][0] << " " <<  m[3][1] << " " <<  m[3][2] << " " <<  m[3][3] << "])" << std::endl;
+            return os;
+        }
 	};
-	ostream& operator << (ostream &os, const SgMatrix4 &m);
-
-	SgMatrix4 operator * (const SgMatrix4 &lfs, const SgMatrix4 &rhs);
-	SgMatrix4 operator * (const SgMatrix4 &lfs, float rhs);
-	SgMatrix4 operator * (float lfs, const SgMatrix4 &rhs);
-	SgMatrix4 operator + (const SgMatrix4 &lfs, const SgMatrix4 &rhs);
-	SgMatrix4 operator - (const SgMatrix4 &lfs, const SgMatrix4 &rhs);
+    typedef SgMatrix4<float> Mat4f;
 }
 
 #endif /* Sgmath_hpp */
