@@ -16,18 +16,18 @@
 
 namespace SoftRender{
     template<typename T>
-	class SgMatrix4
+	class Matrix4
 	{
 	public:
 		T m[4][4];
-		SgMatrix4 (){ memset(m, 0, sizeof(m)); m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0; }
+		Matrix4 (){ memset(m, 0, sizeof(m)); m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0; }
 
-		bool operator== (const SgMatrix4<T>& rhs){return this == &rhs;}
-		bool operator != (const SgMatrix4<T>& rhs){return !operator==(rhs);}
+		bool operator== (const Matrix4<T>& rhs){return this == &rhs;}
+		bool operator != (const Matrix4<T>& rhs){return !operator==(rhs);}
 		T* operator[](int row){return m[row];}
 		const T* operator[] (int row)const {return m[row];}
 
-		SgMatrix4(const SgMatrix4<T>& other)
+		Matrix4(const Matrix4<T>& other)
 		{
 			for (int i = 0; i < 4; i++)
 			{
@@ -38,7 +38,7 @@ namespace SoftRender{
 			}
 		}
 
-		SgMatrix4(Vec4<T>&x, Vec4<T>& y, Vec4<T>&z)
+		Matrix4(Vec4<T>&x, Vec4<T>& y, Vec4<T>&z)
 		{
 			for(int i = 0; i < 4; i++)
 			{
@@ -48,7 +48,7 @@ namespace SoftRender{
 			}
 		}
 
-		SgMatrix4(Vec4<T>&x, Vec4<T>& y, Vec4<T>&z, Vec4<T>& w )
+		Matrix4(Vec4<T>&x, Vec4<T>& y, Vec4<T>&z, Vec4<T>& w )
 		{
 			for(int i = 0; i < 4; i++)
 			{
@@ -77,9 +77,9 @@ namespace SoftRender{
 		}
 
 		//inverse matrix
-		SgMatrix4<T> Inverse() const
+		Matrix4<T> Inverse() const
 		{
-			SgMatrix4<T> r;
+			Matrix4<T> r;
 			T d = Determinant();
 			if (abs(d) < 0.001)
 			{
@@ -158,9 +158,9 @@ namespace SoftRender{
 
 		}
 
-		SgMatrix4<T> Transpose() const
+		Matrix4<T> Transpose() const
 		{
-			SgMatrix4<T> r;
+			Matrix4<T> r;
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
@@ -171,7 +171,7 @@ namespace SoftRender{
 			return r;
 		}
 
-		bool IsEqual(const SgMatrix4<T>& rhs)
+		bool IsEqual(const Matrix4<T>& rhs)
 		{
 			for (int i = 0; i < 4; i++)
 			{
@@ -184,7 +184,7 @@ namespace SoftRender{
 			return true;
 		}
 
-		SgMatrix4<T>& operator=(const SgMatrix4& rhs)
+		Matrix4<T>& operator=(const Matrix4& rhs)
 		{
 			if (this == &rhs) return *this;
 
@@ -198,9 +198,9 @@ namespace SoftRender{
 			return *this;
 		}
 
-		SgMatrix4<T> operator+(const SgMatrix4<T> & rhs)
+		Matrix4<T> operator+(const Matrix4<T> & rhs)
 		{
-			SgMatrix4<T> r;
+			Matrix4<T> r;
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
@@ -211,9 +211,9 @@ namespace SoftRender{
 			return r;
 		}
 
-		SgMatrix4<T> operator-(const SgMatrix4<T> & rhs)
+		Matrix4<T> operator-(const Matrix4<T> & rhs)
 		{
-			SgMatrix4<T> r;
+			Matrix4<T> r;
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
@@ -224,9 +224,9 @@ namespace SoftRender{
 			return r;
 		}
 
-		SgMatrix4<T> operator* ( const SgMatrix4<T> &rhs)
+		Matrix4<T> operator* ( const Matrix4<T> &rhs)
 		{
-			SgMatrix4<T> r;
+			Matrix4<T> r;
 			for( int i = 0; i < 4; i++) 
 			{
 				for (int j = 0; j < 4; j++)
@@ -240,9 +240,9 @@ namespace SoftRender{
 			return r;
 		}
 
-		SgMatrix4<T> operator*(T rhs)
+		Matrix4<T> operator*(T rhs)
 		{
-			SgMatrix4<T> r;
+			Matrix4<T> r;
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
@@ -253,9 +253,9 @@ namespace SoftRender{
 			return r;
 		}
 
-		friend SgMatrix4<T> operator*(T lfs, const SgMatrix4<T>& rhs)
+		friend Matrix4<T> operator*(T lfs, const Matrix4<T>& rhs)
 		{
-			SgMatrix4<T> r;
+			Matrix4<T> r;
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
@@ -266,7 +266,7 @@ namespace SoftRender{
 			return r;
 		}
 
-		friend std::ostream& operator << (std::ostream &os, const SgMatrix4<T> &m)
+		friend std::ostream& operator << (std::ostream &os, const Matrix4<T> &m)
         {
             os << "[" <<  m[0][0] << " " <<  m[0][1] << " " <<  m[0][2] << " " <<  m[0][3] << "\n"
             << " "<<  m[1][0] << " " <<  m[1][1] << " " <<  m[1][2] << " " <<  m[1][3] << "\n"
@@ -275,7 +275,7 @@ namespace SoftRender{
             return os;
         }
 	};
-    
+ 	typedef Matrix4<float> Mat4f;   
 }
 
 #endif /* Sgmath_hpp */

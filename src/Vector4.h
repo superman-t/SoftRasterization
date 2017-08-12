@@ -3,7 +3,6 @@
 //  Sgraphic
 //
 //  Created by AceTian on 2017/8/1.
-//  Copyright © 2017年 AceTian. All rights reserved.
 //
 
 #ifndef Vector4_h
@@ -11,6 +10,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include "Vector3.h"
 
 namespace SoftRender{
     template<typename T>
@@ -19,12 +19,14 @@ namespace SoftRender{
 		T x, y, z, w;
 	public:
 		Vec4():x(T(0)), y(T(0)), z(T(0)),w(T(0)){}
-		Vec4(T _x, T _y, T _z, T _w):x(_x),y(_y),z(_z),w(_w){}
-		Vec4(T _x, T _y, T _z):x(_x), y(_y), z(_z), w(0){}
-        Vec4(T xx):x(xx), y(xx), z(xx), w(xx){}
+		explicit Vec4(T _x, T _y, T _z, T _w):x(_x),y(_y),z(_z),w(_w){}
+		explicit Vec4(T _x, T _y, T _z):x(_x), y(_y), z(_z), w(0.0){}
+        explicit Vec4(T xx):x(xx), y(xx), z(xx), w(xx){}
+		Vec4(Vec3<T>&v):x(v.x), y(v.y), z(v.z), w(0.0){}
 		Vec4(const Vec4& v) {x = v.x, y = v.y, z = v.z, w = v.w;}
     
 		Vec4<T>& operator=(const Vec4<T>& v){x = v.x; y = v.y;z = v.z;w = v.w; return *this;}
+		Vec4<T>& operator=(const Vec3<T>& v){x = v.x; y = v.y;z = v.z;w = 1.0; return *this;}
     
 		Vec4<T> operator+(const Vec4<T>& v) const{return Vec4<T>(x + v.x, y + v.y, z + v.z, w + v.w);}
 		Vec4<T> operator-(const Vec4<T>& v) const{return Vec4<T>(x - v.x, y - v.y, z - v.z, w - v.w);}
@@ -70,7 +72,7 @@ namespace SoftRender{
             if (len > 0)
             {
                 T len2 = 1/len;
-                x*=len2, y*=len2, z*=len2, w*=len2;
+                x*=len2, y*=len2, z*=len2;
             }
 			return *this;
 		}
@@ -81,6 +83,6 @@ namespace SoftRender{
             return os;
         }
 	};
-    
+    typedef Vec4<float> Vec4f;
 }
-#endif /* Vec4_h */
+#endif /* Vector4_h */

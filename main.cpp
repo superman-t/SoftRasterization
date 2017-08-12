@@ -3,21 +3,19 @@
 //  Sgraphic
 //
 //  Created by AceTian on 2017/8/1.
-//  Copyright © 2017年 AceTian. All rights reserved.
 //
 
 #include <iostream>
 #include <stdlib.h>
-#include "Sgmath.hpp"
-#include "Vector4.h"
-#include "test.h"
+#include "src/Matrix4.h"
+#include "src/Vector4.h"
+#include "src/test.h"
 using namespace SoftRender;
 
 
 using namespace std;
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    test::testMatrix();
-    
+	test::testRender();
+    system("pause");
     return 0;
 }
