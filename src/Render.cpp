@@ -1,6 +1,19 @@
 #include "Render.h"
 
 namespace SoftRender{
+
+	//计算三角形面积
+	static inline float calculateArea (const Vec4f &p0, const Vec4f &p1, const Vec4f &p2) {
+		return ((p2.x - p0.x) * (p1.y - p0.y) - (p2.y - p0.y) * (p1.x - p0.x));
+	} // note that the result of edge function could be represent as area as well.
+
+	//重心法插值uv坐标
+	static inline void Interpolate (const Vertex &v0, const Vertex &v1, const Vertex &v2, Vertex &v, Vec4f &w) {
+		w.x = calculateArea (v1.pos, v2.pos, v.pos) / w.w; 
+		w.y = calculateArea (v2.pos, v0.pos, v.pos) / w.w;
+		w.z = calculateArea (v0.pos, v1.pos, v.pos) / w.w;
+		v.uv = (v0.uv * w.x + v1.uv * w.y + v2.uv * w.z);
+	} 
 	
 	void Render::setPixel (int x, int y, const Color &color) {
 		if (x >= 0 && x < width && y >= 0 && y < height) {
@@ -58,17 +71,6 @@ namespace SoftRender{
 		DrawLine (v1.pos, v2.pos, color); 
 		DrawLine (v0.pos, v2.pos, color);
 	}
-
-	static inline float EdgeFunc (const Vec4f &p0, const Vec4f &p1, const Vec4f &p2) {
-		return ((p2.x - p0.x) * (p1.y - p0.y) - (p2.y - p0.y) * (p1.x - p0.x));
-	} // note that the result of edge function could be represent as area as well.
-
-	static inline void Interpolate (const Vertex &v0, const Vertex &v1, const Vertex &v2, Vertex &v, Vec4f &w) {
-		w.x = EdgeFunc (v1.pos, v2.pos, v.pos) / w.w; 
-		w.y = EdgeFunc (v2.pos, v0.pos, v.pos) / w.w;
-		w.z = EdgeFunc (v0.pos, v1.pos, v.pos) / w.w;
-		v.uv = (v0.uv * w.x + v1.uv * w.y + v2.uv * w.z);
-	} 
 
 	/*advanced Rasterization from http://forum.devmaster.net/t/advanced-rasterization/6145/1
 		void Render::FillTriangle(Mesh mesh, Vertex& v1, Vertex& v2, Vertex& v3){
@@ -197,7 +199,7 @@ namespace SoftRender{
 		int miny = std::min(std::min(v1.pos.y, v2.pos.y), v3.pos.y);
 		int maxy = std::max(std::max(v1.pos.y, v2.pos.y), v3.pos.y);
 
-		Vec4f weight = Vec4f(0, 0, 0, EdgeFunc (v1.pos, v2.pos, v3.pos));
+		Vec4f weight = Vec4f(0, 0, 0, calculateArea (v1.pos, v2.pos, v3.pos));
 		for(int y = miny; y < maxy; y++)
 		{
 			for(int x = minx; x < maxx; x++)
@@ -233,25 +235,30 @@ namespace SoftRender{
 		for (auto &mesh : model.meshes) {
 			Vertex outVertex[3];
 			bool badTriangle = false;
+			int numTriangle = mesh.indices.size()/3;
+			for (int j = 0; j < numTriangle; j++)
+			{
+				for (int i = 0, n = 3*j; i < 3; i++, n = i+3*j) {
+					VertexShader(mesh.vertices[n].pos, mesh.vertices[n].normal, mesh.vertices[n].uv, outVertex[i]);
 
-			for (int i = 0; i < mesh.vertices.size(); i++) {
-				VertexShader(mesh.vertices[i].pos, mesh.vertices[i].normal, mesh.vertices[i].uv, outVertex[i]);
-				
-				if (outVertex[i].pos.z < -1.0f || outVertex[i].pos.z > 1.0f) {
-					badTriangle = true;	break;
-				} // check the vertex inside or outside the view frustum
-				Ndc2Screen (outVertex[i].pos); // convert to screen coordinate
+					if (outVertex[i].pos.z < 0.0f || outVertex[i].pos.z > 1.0f) {
+						badTriangle = true;	
+						break;
+					} // check the vertex inside or outside the view frustum
+					Ndc2Screen (outVertex[i].pos); // convert to screen coordinate
+				}
+
+				// skip triangles that are invisible
+				if (badTriangle || BackFaceCulling (outVertex[0].viewPos,outVertex[1].viewPos,
+					outVertex[2].viewPos)) continue;
+
+				// texture mode drawing
+				if (drawTex) FillTriangle (mesh, outVertex[0], outVertex[1], outVertex[2]);
+
+				// wireframe mode drawing
+				if (drawWireFrame) DrawTriangle (outVertex[0], outVertex[1], outVertex[2], Color(0, 1.0f, 0, 0 ));
 			}
 
-			// skip triangles that are invisible
-			if (badTriangle || BackFaceCulling (outVertex[0].viewPos,outVertex[1].viewPos,
-				outVertex[2].viewPos)) continue;
-
-			// texture mode drawing
-			if (drawTex) FillTriangle (mesh, outVertex[0], outVertex[1], outVertex[2]);
-
-			// wireframe mode drawing
-			if (drawWireFrame) DrawTriangle (outVertex[0], outVertex[1], outVertex[2], Color(0, 1.0f, 0, 0 ));
 		} // travers all triangles
 	}
 	

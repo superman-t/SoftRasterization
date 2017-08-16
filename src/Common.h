@@ -13,16 +13,17 @@
 #include "slm.h"
 #include "Color.h"
 #include "Vertex.h"
-#include "Index.h"
 #include "Texture.h"
 
 #include "Light.h"
 #include "Material.h"
 #include "Mesh.h"
+#include <SOIL.h>
 
 
 namespace SoftRender
 {
+	using namespace std;
 	Mat4f ModelMatrix(Vec4f & translate);
 	Mat4f ViewMatrix(const Vec4f& look, const Vec4f& at, const Vec4f& up);
 	Mat4f Perspective(float radians, float ratio, float near, float far);
@@ -31,8 +32,8 @@ namespace SoftRender
 	Vec4f TransformPoint(const Vec4f& d, const Mat4f& m);
 	Vec4f TransformDir(const Vec4f& d, const Mat4f& m);
 
-	void SaveBmp(std::vector<Color> &frameBuffer, int width, int height, std::string file);
-	bool LoadBmp (Texture &texture, std::string file);
+	void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string file);
+	bool LoadTexture (Texture &texture, std::string file);
 
 };
 

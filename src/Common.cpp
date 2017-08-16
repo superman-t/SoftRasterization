@@ -9,47 +9,100 @@
 #include "Common.h"
 #include <ostream>
 #include <fstream>
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image.h"
+#include "stb_image_write.h"
 
 
 namespace SoftRender
 {
-	void SaveBmp(std::vector<Color> &frameBuffer, int width, int height, std::string file)
+	enum TextureType
 	{
-#define INT2CHAR_BIT(num, bit) (unsigned char)(((num) >> (bit)) & 0xff)
-#define INT2CHAR(num) INT2CHAR_BIT((num),0), INT2CHAR_BIT((num),8), INT2CHAR_BIT((num),16), INT2CHAR_BIT((num),24)
-		unsigned char buf[54] = { 'B', 'M', INT2CHAR (54 + width*height * 32), INT2CHAR (0), INT2CHAR (54), INT2CHAR (40), INT2CHAR (width), INT2CHAR (height), 1, 0, 32, 0 };
-		std::ofstream ofs (file, std::ios_base::out | std::ios_base::binary);
-		ofs.write ((char *)buf, sizeof (buf));
-		for (auto &color : frameBuffer) {
-			buf[0] = (unsigned char)std::min (255, (int)(color.B * 255));
-			buf[1] = (unsigned char)std::min (255, (int)(color.G * 255));
-			buf[2] = (unsigned char)std::min (255, (int)(color.R * 255));
-			buf[3] = (unsigned char)std::min (255, (int)(color.A * 255));
-			ofs.write ((char *)buf, 4);
-		}
+		PNG, JPG, BMP
+	};
+	template<typename T>
+	T min3(T a, T b, T c)
+	{
+		return std::min(a, std::min(b, c));
 	}
 
-	bool LoadBmp (Texture &texture, std::string file) {
-		std::ifstream is (file, std::ios_base::binary);
-		if (!is) return false;
-		unsigned char buf[54];
-		is.read ((char *)buf, sizeof (buf));
-		// in bmp header, height could be negtive
-		texture.width = *(int *)&buf[18], texture.height = abs (*(int *)&buf[22]);
-		int bytes = buf[28] / 8, count = texture.width * texture.height * bytes;
-		unsigned char *tmp = new unsigned char[count];
-		is.read ((char *)tmp, count);
+	template<typename T>
+	T max3(T a, T b, T c)
+	{
+		return std::max(a, std::max(b, c));
+	}
+
+	//png, jpg, jpeg, bmp, tga
+	void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string file)
+	{
+		std::string suffix = file.substr(file.find_last_of('.')+1);
+		int comp = 3;
+		TextureType type;
+		if(!suffix.compare("png"))
+		{
+			comp = 4;
+			type = PNG;
+		}else if(!suffix.compare("jpg"))
+			type = JPG;	
+		else if(!suffix.compare("bmp"))
+			type = BMP;
+
+		unsigned char* data = new unsigned char[width*height*comp];
+		int count = 0;
+		
+		for (auto &color : frameBuffer) {
+			data[count+0] = (unsigned char)std::min (255, (int)(color.R * 255));
+			data[count+1] = (unsigned char)std::min (255, (int)(color.G * 255));
+			data[count+2] = (unsigned char)std::min (255, (int)(color.B * 255));
+			if (type == PNG) data[count+3] = (unsigned char)std::min (255, (int)(color.A * 255));
+			count += comp;
+		}
+
+		switch (type)
+		{
+		case PNG:
+			stbi_write_png(file.c_str(), width, height, comp, data, width*4);
+			break;
+		case JPG:
+			stbi_write_jpg(file.c_str(), width, height, comp, data, 100);
+			break;
+		case BMP:
+			stbi_write_bmp(file.c_str(), width, height, comp, data);
+			break;
+		default:
+			std::cout << "save texture failed" << std::endl;
+			break;
+		}
+		delete[] data;
+	}
+
+	bool LoadTexture (Texture &texture, std::string file) {
+		//     N=#comp     components
+		//       1           grey
+		//       2           grey, alpha
+		//       3           red, green, blue
+		//       4           red, green, blue, alpha
+		int comp;
+		unsigned char* tmp = stbi_load(file.c_str(), &texture.width, &texture.height, &comp, STBI_rgb);
+		if (tmp == NULL)
+		{
+			std::cout << "load file failed" << std::endl;
+			return false;
+		}
+
+		int count = texture.width * texture.height * STBI_rgb;
+
 		texture.data.resize (texture.width * texture.height);
 		count = 0;
 		for (auto &color : texture.data) {
-			color = Color(tmp[count + 2] / 255.0f, tmp[count + 1] / 255.0f, tmp[count + 0] / 255.0f, 0.0f );
-			count += bytes;
+			color = Color(tmp[count + 2] / 255.0f, tmp[count + 1] / 255.0f, tmp[count + 0] / 255.0f );
+			count += STBI_rgb;
 		}
-		delete[]tmp;
+		
+		stbi_image_free(tmp);
 		return true;
-	} // load bmp into texture
-
-	
+	}
 
 	// projection Matrix4
 	Mat4f Perspective(float radians, float ratio, float near, float far)
@@ -88,15 +141,6 @@ namespace SoftRender
 		Mat4f m(xaxis, yaxis, zaxis, w);
 		return m.Inverse();//world space to view space's matrix = (camera in world space's pos)'s inverse
 	}
-
-	Vec4f TransformPoint (const Vec4f &b, const Mat4f &mat) {
-		Vec4f v;
-		v.w = b.x * mat.m[0][3] + b.y * mat.m[1][3] + b.z * mat.m[2][3] + mat.m[3][3];
-		v.x = (b.x * mat.m[0][0] + b.y * mat.m[1][0] + b.z * mat.m[2][0] + mat.m[3][0]) / v.w;
-		v.y = (b.x * mat.m[0][1] + b.y * mat.m[1][1] + b.z * mat.m[2][1] + mat.m[3][1]) / v.w;
-		v.z = (b.x * mat.m[0][2] + b.y * mat.m[1][2] + b.z * mat.m[2][2] + mat.m[3][2]) / v.w;
-		return v;
-	} // using matrix to transform a point.
 
 	Vec4f TransformDir(const Vec4f& d, const Mat4f& m)
 	{

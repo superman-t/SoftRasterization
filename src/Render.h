@@ -27,7 +27,7 @@ namespace SoftRender {
 
 		inline void Ndc2Screen (Vec4f &pos) {
 			pos.x = (pos.x + 1)* 0.5f * width; 
-			pos.y = (pos.y + 1)* 0.5f * height;
+			pos.y = (1 - pos.y)* 0.5f * height;//flip y on screen coordinate
 			
 		} // convert from normalized device coordinate to screen coordinate
 

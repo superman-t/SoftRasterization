@@ -6,9 +6,10 @@
 namespace SoftRender {
 	struct Texture{
 		int width, height;
-		float smax, tmax;
+		std::string path;
 		std::vector<Color> data;
 		Color Map(float u, float v){
+			int width = 256, height = 256;
 			u = std::min (1.0f, std::max (0.0f, u));
 			v = std::min (1.0f, std::max (0.0f, v));
 			unsigned int iu = int(u*(width))%(width);

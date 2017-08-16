@@ -7,84 +7,153 @@ namespace SoftRender
 {
 	Model::Model(std::string path, Vec3f& worldPos, Material m):material(m),path(path), pos(worldPos)
 	{
-		loadModel(path+".obj");
+		loadModel(path);
 	}
 
-	//only obj file
-	void Model::loadModel(std::string path)
+	void Model::loadModel(string path)
 	{
-		float x, y, z;
-		char dummy;
-		std::ifstream is (path);
-		std::string data;
-		std::vector<Vec4f> normalBuffer, posBuffer;
-		std::vector<Vec2f> uvBuffer;
-		std::vector<Index> indexBuffer;
-		
-		while (std::getline (is, data)) {
-			if (data.length () < 2) continue;
-			if (data.find("mtllib") != std::string::npos){
-				int begin = data.find_first_of(" ")+1;
-				texturename = data.substr(begin);
-				texturename = texturename.replace(texturename.find_last_of("."), 4, ".bmp");
-				
-			}
-			std::istringstream iss (data);
-			std::string token;
-			if (data[1] == 't' && data[0] == 'v') { // load uv. "vt -0.05 0.0972793"
-				iss >> token >> x >> y;
-				uvBuffer.push_back (Vec2f(x, y));
-			} else if (data[1] == 'n' && data[0] == 'v') { // load normal. "vn -0.981591 -0.162468 0.100411"
-				iss >> token >> x >> y >> z;
-				normalBuffer.push_back (Vec4f(x, y, z));
-			} else if (data[0] == 'v') { // load postion. "v -0.983024 -0.156077 0.0964607"
-				iss >> token >> x >> y >> z;
-				posBuffer.push_back (Vec4f(x, y, z));
-			} else if (data[0] == 'f') { // load index. keep in mind that uv/normal index are optional.
-				Index index = { { -1 } };
-				if (data.find ("//") != std::string::npos) { // pos//normal, no uv. "f 181//176 182//182 209//208"
-					iss >> token >> index.pos[0] >> dummy >> dummy >> index.normal[0] >>
-						index.pos[1] >> dummy >> dummy >> index.normal[1] >>
-						index.pos[2] >> dummy >> dummy >> index.normal[2];
-				} else {
-					size_t count = 0, pos = data.find ('/');
-					while (pos != std::string::npos) { count++; pos = data.find ('/', pos + 1); }
-					if (count == 6) { // "f 181/292/176 182/250/182 209/210/208"
-						iss >> token >> index.pos[0] >> dummy >> index.uv[0] >> dummy >> index.normal[0] >>
-							index.pos[1] >> dummy >> index.uv[1] >> dummy >> index.normal[1] >>
-							index.pos[2] >> dummy >> index.uv[2] >> dummy >> index.normal[2];
-					} else if (count == 3) { // pos/uv, no normal. "f 181/176 182/182 209/208"
-						iss >> token >> index.pos[0] >> dummy >> index.uv[0] >> index.pos[1] >> dummy >> index.uv[1] >> index.pos[2] >> dummy >> index.uv[2];
-					}
-				}
-				//std::cout << index.pos[0] << index.pos[1] << index.pos[2] 
-				//<< index.uv[0] << index.uv[0] << index.uv[0]<<  std::endl;
+		Assimp::Importer import;
+		const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate|aiProcess_GenNormals);
 
-				indexBuffer.push_back (index);
-			}
-		} // end parsing
-		if (!texturename.empty()) // load texture only if the model has uv data.
-			LoadBmp (texture, "res/"+texturename);
-		setupMesh(uvBuffer, normalBuffer, posBuffer, indexBuffer);
-	} // obj is a text base model format
-
-	void Model::setupMesh(std::vector<Vec2f>& uvBuffer, std::vector<Vec4f>& normalBuffer, std::vector<Vec4f>& posBuffer,
-		std::vector<Index>& indexBuffer)
-	{
-		//set up mesh
-		for (auto &index : indexBuffer) {
-			std::vector<Vertex> vertexs;
-			std::vector<unsigned short> indices;
-			for (int i = 0; i < 3; i++) {
-				Vertex vertex;
-				if ( posBuffer.size() >0 ) vertex.pos =posBuffer[(index.pos[i]-1)%posBuffer.size()];
-				if ( uvBuffer.size() > 0) vertex.uv = uvBuffer[(index.uv[i]-1)%uvBuffer.size()];
-				//vertex.normal = normalBuffer.size()>0 ? normalBuffer[index.normal[i]%normalBuffer.size()] : Vec4f();
-				vertexs.push_back(vertex);
-				indices.push_back(i);
-			} 
-			meshes.push_back(Mesh(vertexs, indices, std::make_shared<Texture>(texture)));
+		if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			cout << "ERROR::ASSIMP::" << import.GetErrorString() << endl;
+			return ;
 		}
+
+		directory = path.substr(0, path.find_last_of('/'));
+		texturename = path.replace(path.find_last_of("."), 4, ".bmp");
+		LoadTexture(texture, texturename);
+
+		processNode(scene->mRootNode, scene);
+		
+		cout << "loadModel" << endl;
+	}
+
+
+
+	void Model::processNode(aiNode *node, const aiScene *scene)
+	{
+		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+			meshes.push_back(processMesh(mesh, scene));
+		}
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			processNode(node->mChildren[i], scene);
+		}
+	}
+
+	Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
+	{
+		vector<Vertex> vertices;
+		vector<unsigned int> indices;
+		std::vector<Texture> textures;
+
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+		{
+			Vertex vertex;
+			if (mesh->HasPositions())
+				vertex.pos = Vec4f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+			if (mesh->HasNormals())
+				vertex.normal = Vec4f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+			if (mesh->mTextureCoords[0])
+			{
+				vertex.uv = Vec2f(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+			}else
+			{
+				vertex.uv = Vec2f();
+			}
+			vertices.push_back(vertex);
+		}
+
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			for (unsigned int j = 0; j < face.mNumIndices; j++)
+			{
+				indices.push_back(face.mIndices[j]);
+			}
+		}
+
+		if(mesh->mMaterialIndex >= 0)
+		{
+			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+			vector<Texture> diffuseMaps = loadMaterialTextures(material, 
+				aiTextureType_DIFFUSE, "texture_diffuse");
+			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+			vector<Texture> specularMaps = loadMaterialTextures(material, 
+				aiTextureType_SPECULAR, "texture_specular");
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		}
+
+		return Mesh(vertices, indices, std::make_shared<Texture>(texture));
+	}
+
+	vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
+	{
+		vector<Texture> textures;
+		for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+		{
+			aiString str;
+			mat->GetTexture(type, i, &str);
+			Texture texture;
+// 			texture.id = TextureFromFile(str.C_Str(), directory);
+// 			texture.type = typeName;
+// 			texture.path = str;
+			textures.push_back(texture);
+		}
+		return textures;
+	}
+
+	/*
+	* 获取一个材质中的纹理
+	*/
+	bool Model::processMaterial(const aiMaterial* matPtr, const aiScene* sceneObjPtr, 
+		const aiTextureType textureType, std::vector<Texture>& textures)
+	{
+		textures.clear();
+
+		if (!matPtr 
+			|| !sceneObjPtr )
+		{
+			return false;
+		}
+		if (matPtr->GetTextureCount(textureType) <= 0)
+		{
+			return true;
+		}
+		for (size_t i = 0; i < matPtr->GetTextureCount(textureType); ++i)
+		{
+			Texture text;
+			aiString textPath;
+			aiReturn retStatus = matPtr->GetTexture(textureType, i, &textPath);
+			if (retStatus != aiReturn_SUCCESS 
+				|| textPath.length == 0)
+			{
+				std::cerr << "Warning, load texture type=" << textureType
+					<< "index= " << i << " failed with return value= "
+					<< retStatus << std::endl;
+				continue;
+			}
+			std::string absolutePath = directory + "/" + textPath.C_Str();
+// 			LoadedTextMapType::const_iterator it = this->loadedTextureMap.find(absolutePath);
+// 			if (it == this->loadedTextureMap.end()) // 检查是否已经加载过了
+// 			{
+// 				GLuint textId = TextureHelper::load2DTexture(absolutePath.c_str());
+// 				text.id = textId;
+// 				text.path = absolutePath;
+// 				text.type = textureType;
+// 				textures.push_back(text);
+// 				loadedTextureMap[absolutePath] = text;
+// 			}
+// 			else
+// 			{
+// 				textures.push_back(it->second);
+// 			}
+		}
+		return true;
 	}
 
 }
