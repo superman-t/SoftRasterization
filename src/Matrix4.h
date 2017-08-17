@@ -81,7 +81,7 @@ namespace SoftRender{
 		{
 			Matrix4<T> r;
 			T d = Determinant();
-			if (abs(d) < 0.001)
+			if (std::abs(d) < 0.001)
 			{
 				return r;
 			}else

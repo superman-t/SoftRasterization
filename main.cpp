@@ -16,6 +16,5 @@ using namespace SoftRender;
 using namespace std;
 int main(int argc, const char * argv[]) {
 	test::testRender();
-    system("pause");
     return 0;
 }

@@ -17,7 +17,7 @@ namespace SoftRender {
 
 		void SetFrustum (float hfov, float ratio, float n, float f) { projMat = Perspective (hfov, ratio, n, f); }
 
-		void SetCamera (Vec3f &look, Vec3f &at) { viewMat = ViewMatrix (look, at, Vec4f(0.0f, 1.0f, 0.0f, 0.0f )); }
+		void SetCamera (Vec3f look, Vec3f at) { viewMat = ViewMatrix (look, at, Vec4f(0.0f, 1.0f, 0.0f, 0.0f )); }
 
 		void SetLight (const Vec3f &pos, const Vec3f &ambi, const Vec3f &diff, const Vec3f &spec) {
 			light.position = pos; light.ambient = ambi; light.diffuse = diff;	light.specular = spec;
@@ -33,7 +33,7 @@ namespace SoftRender {
 
 		//顺时针为背面进行剔除
 		inline bool BackFaceCulling (const Vec4f &p0, const Vec4f &p1, const Vec4f &p2) { 
-			return (p0.Dot ((p1 - p0).Cross (p2 - p0)) >= 0); 
+			return (p0.Dot ((p1 - p0).Cross (p2 - p0)) > 0);
 		}
 
 		void setPixel (int x, int y, const Color &color);

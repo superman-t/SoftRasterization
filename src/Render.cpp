@@ -247,11 +247,9 @@ namespace SoftRender{
 					} // check the vertex inside or outside the view frustum
 					Ndc2Screen (outVertex[i].pos); // convert to screen coordinate
 				}
-
 				// skip triangles that are invisible
 				if (badTriangle || BackFaceCulling (outVertex[0].viewPos,outVertex[1].viewPos,
 					outVertex[2].viewPos)) continue;
-
 				// texture mode drawing
 				if (drawTex) FillTriangle (mesh, outVertex[0], outVertex[1], outVertex[2]);
 

@@ -18,7 +18,6 @@
 #include "Light.h"
 #include "Material.h"
 #include "Mesh.h"
-#include <SOIL.h>
 
 
 namespace SoftRender

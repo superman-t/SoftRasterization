@@ -15,7 +15,13 @@ namespace SoftRender
 		Texture texture;
 		Vec4f pos;
 		vector<Mesh> meshes;
-		Model(std::string path, Vec3f& worldPos, Material m);
+		Model(std::string path, Vec3f worldPos, Material m);
+        Model(const Model& m)
+        {
+            path = m.path;
+            pos = m.pos;
+            material = m.material;
+        }
 	private:
 		string directory;
 		std::string texturename;

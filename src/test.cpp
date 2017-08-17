@@ -34,17 +34,17 @@ void test::testRender()
 	const int WIDTH = 1024, HEIGHT = 768;
 	Render render(WIDTH, HEIGHT);
 	render.SetFrustum(M_PI_2, float(WIDTH)/(float)HEIGHT, 0.1f, 1000.0f);
-	render.SetCamera(Vec3f(5.0f, 5.0f, 5.0f), Vec3f());
+	render.SetCamera(Vec3f(15.0f, 15.0f, 15.0f), Vec3f());
 	//render.SetLight(Vec3f(0.0f, 0.0f, 30.0f), Vec3f(0.5f, 0.0f, 0.0f), Vec3f(0.8f, 0.8f, 0.8f), Vec3f(0.5f, 0.5f, 0.5f));
 
-	Model sphere(std::string("res/sphere.obj"), Vec3f(0, 0, 0), Material());
- 	render.DrawModel(sphere, true, true);
+//	Model sphere(std::string("/Users/acetian/Documents/opengl/Sgraphic/res/sphere.obj"), Vec3f(0, 0, 0), Material());
+// 	render.DrawModel(sphere, true, true);
 
-	Model cube(std::string("res/cube.obj"), Vec3f(0, 0, -2), Material());
-	render.DrawModel(cube, true, true);
+	Model cube(std::string("/Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/cow.obj"), Vec3f(0, 0, 0), Material());
+	render.DrawModel(cube, false, true);
 
-	//  	Model bunny(std::string("res/bunny.obj"), Vec3f(0, 5, 0), Material());
-	//  	render.DrawModel(bunny, false, true);
+//    Model bunny(std::string("/Users/acetian/Documents/opengl/Sgraphic/res/bunny.obj"), Vec3f(0, 0, 0), Material());
+//    render.DrawModel(bunny, false, true);
 
-	SaveTexture(render.frameBuffer, WIDTH, HEIGHT, "screenshot.bmp");
+	SaveTexture(render.frameBuffer, WIDTH, HEIGHT, "screenshot.jpg");
 }
