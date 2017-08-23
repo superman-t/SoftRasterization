@@ -6,7 +6,7 @@ file(GLOB SoftRender_src "src/*.h" "src/*.cpp" "main.cpp")
 
 include_directories(3rdparty/assimp-3.1.1/include)
 
-link_directories(${CMAKE_CURRENT_BINARY_DIR}/../3rdparty/assimp-3.1.1/lib)
+link_directories(${PROJECT_SOURCE_DIR}/3rdparty/assimp-3.1.1/lib)
 
 add_executable(SoftRender ${SoftRender_src} )
 target_link_libraries (SoftRender assimp)
