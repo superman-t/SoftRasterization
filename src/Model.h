@@ -12,8 +12,8 @@ namespace SoftRender
 	{
 		std::string path;
 		Material material;
-		Texture texture;
-		Vec4f pos;
+		//Texture texture;
+		Vec3f pos;
 		vector<Mesh> meshes;
 		Model(std::string path, Vec3f& worldPos, Material m);
 	private:
@@ -25,8 +25,7 @@ namespace SoftRender
 		Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 		vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, 
 			string typeName);
-		bool processMaterial(const aiMaterial* matPtr, const aiScene* sceneObjPtr, 
-			const aiTextureType textureType, std::vector<Texture>& textures);
+		unsigned int Model::TextureFromFile(Texture& texture, const string& path, const string& directory);
 	};
 }
 

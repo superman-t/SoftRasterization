@@ -38,25 +38,30 @@ namespace SoftRender{
 			}
 		}
 
-		Matrix4(Vec4<T>&x, Vec4<T>& y, Vec4<T>&z)
+		Matrix4(Vec3<T>&x, Vec3<T>& y, Vec3<T>&z)
 		{
-			for(int i = 0; i < 4; i++)
+			for(int i = 0; i < 3; i++)
 			{
 				m[0][i] = x[i];
 				m[1][i] = y[i];
 				m[2][i] = z[i];
 			}
+			m[3][0] = m[3][1] = m[3][2] = 0.0;
+			m[0][3] = m[1][3] = m[2][3] = 0.0;
+			m[3][3] = 1.0;
 		}
 
-		Matrix4(Vec4<T>&x, Vec4<T>& y, Vec4<T>&z, Vec4<T>& w )
+		Matrix4(Vec3<T>&x, Vec3<T>& y, Vec3<T>&z, Vec3<T>& w )
 		{
-			for(int i = 0; i < 4; i++)
+			for(int i = 0; i < 3; i++)
 			{
 				m[0][i] = x[i];
 				m[1][i] = y[i];
 				m[2][i] = z[i];
 				m[3][i] = w[i];
 			}
+			m[0][3] = m[1][3] = m[2][3] = 0.0;
+			m[3][3] = 1.0;
 		}
 
 
@@ -81,7 +86,7 @@ namespace SoftRender{
 		{
 			Matrix4<T> r;
 			T d = Determinant();
-			if (abs(d) < 0.001)
+			if (std::abs(d) < 0.001)
 			{
 				return r;
 			}else

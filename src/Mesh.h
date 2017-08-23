@@ -7,25 +7,25 @@ namespace SoftRender{
 	{
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
-		std::shared_ptr<Texture> texture;
+		std::vector<Texture> textures;
 
 		Mesh( std::vector<Vertex> _vertices,  std::vector<unsigned int> _indices)
 		{
 			vertices = _vertices;
 			indices = _indices;
 		}
-		Mesh(std::vector<Vertex> _vertices, std::vector<unsigned int> _indices, std::shared_ptr<Texture> _texture)
+		Mesh(std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, std::vector<Texture>& _textures)
 		{
 			vertices = _vertices;
 			indices = _indices;
-			texture = _texture;
+			textures = _textures;
 		}
 
 		Mesh(Mesh& _m)
 		{
 			vertices = _m.vertices;
 			indices = _m.indices;
-			texture = _m.texture;
+			textures = _m.textures;
 		}
 
 	};

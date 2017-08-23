@@ -3,13 +3,13 @@
 
 namespace SoftRender {
 	struct Light {
-		Vec4f position;
-		Vec4f ambient;
-		Vec4f diffuse;
-		Vec4f specular;
+		Vec3f position;
+		Vec3f ambient;
+		Vec3f diffuse;
+		Vec3f specular;
 
-		Light():position(Vec4f(1.0, 1.0, 1.0)), ambient(Vec4f(1.0, 1.0, 1.0)), diffuse(Vec4f(1.0, 1.0, 1.0)), specular(Vec4f(1.0, 1.0, 1.0)){}
-		Light(Vec4f& _pos, Vec4f& _ambient, Vec4f& _diffuse, Vec4f& _specular):position(_pos),
+		Light():position(Vec3f(1.0, 1.0, 1.0)), ambient(Vec3f(1.0, 1.0, 1.0)), diffuse(Vec3f(1.0, 1.0, 1.0)), specular(Vec3f(1.0, 1.0, 1.0)){}
+		Light(Vec3f& _pos, Vec3f& _ambient, Vec3f& _diffuse, Vec3f& _specular):position(_pos),
 			ambient(_ambient), diffuse(_diffuse), specular(_specular){}
 	};
 }

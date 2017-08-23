@@ -2,6 +2,7 @@
 #include "Model.h"
 #include <fstream>
 #include <sstream>
+#include "TextureManager.h"
 
 namespace SoftRender
 {
@@ -13,7 +14,7 @@ namespace SoftRender
 	void Model::loadModel(string path)
 	{
 		Assimp::Importer import;
-		const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate|aiProcess_GenNormals);
+		const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate|aiProcess_FlipUVs);
 
 		if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
@@ -22,8 +23,8 @@ namespace SoftRender
 		}
 
 		directory = path.substr(0, path.find_last_of('/'));
-		texturename = path.replace(path.find_last_of("."), 4, ".bmp");
-		LoadTexture(texture, texturename);
+		//texturename = path.replace(path.find_last_of("."), 4, ".bmp");
+		//LoadTexture(texture, texturename);
 
 		processNode(scene->mRootNode, scene);
 		
@@ -55,9 +56,9 @@ namespace SoftRender
 		{
 			Vertex vertex;
 			if (mesh->HasPositions())
-				vertex.pos = Vec4f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+				vertex.pos = Vec3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 			if (mesh->HasNormals())
-				vertex.normal = Vec4f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+				vertex.normal = Vec3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 			if (mesh->mTextureCoords[0])
 			{
 				vertex.uv = Vec2f(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
@@ -83,25 +84,34 @@ namespace SoftRender
 			vector<Texture> diffuseMaps = loadMaterialTextures(material, 
 				aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			vector<Texture> specularMaps = loadMaterialTextures(material, 
-				aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+// 			vector<Texture> specularMaps = loadMaterialTextures(material, 
+// 				aiTextureType_SPECULAR, "texture_specular");
+// 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+// 
+// 			std::vector<Texture> normalMaps = loadMaterialTextures(material, 
+// 				aiTextureType_HEIGHT, "texture_normal");
+// 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+// 
+// 			std::vector<Texture> heightMaps = loadMaterialTextures(material, 
+// 				aiTextureType_AMBIENT, "texture_height");
+// 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 		}
-
-		return Mesh(vertices, indices, std::make_shared<Texture>(texture));
+		return Mesh(vertices, indices, textures);
+		//return Mesh(vertices, indices, std::make_shared<Texture>(texture));
 	}
 
 	vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
 	{
 		vector<Texture> textures;
+		std::cout << mat->GetTextureCount(type);
 		for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 		{
 			aiString str;
 			mat->GetTexture(type, i, &str);
 			Texture texture;
-// 			texture.id = TextureFromFile(str.C_Str(), directory);
-// 			texture.type = typeName;
-// 			texture.path = str;
+			TextureFromFile(texture, str.C_Str(), directory);
+			texture.type = typeName;
+			texture.path = string(directory + "/" + str.C_Str())  ;
 			textures.push_back(texture);
 		}
 		return textures;
@@ -110,34 +120,15 @@ namespace SoftRender
 	/*
 	* 获取一个材质中的纹理
 	*/
-	bool Model::processMaterial(const aiMaterial* matPtr, const aiScene* sceneObjPtr, 
-		const aiTextureType textureType, std::vector<Texture>& textures)
+	unsigned int Model::TextureFromFile(Texture& texture, const string& path, const string& directory)
 	{
-		textures.clear();
+		string filename = directory + "/" + path;
+		std::cout << filename << std::endl;
+		TextureManager::getInstance()->LoadTexture(texture, filename);
+		return 1;
+		}
 
-		if (!matPtr 
-			|| !sceneObjPtr )
-		{
-			return false;
-		}
-		if (matPtr->GetTextureCount(textureType) <= 0)
-		{
-			return true;
-		}
-		for (size_t i = 0; i < matPtr->GetTextureCount(textureType); ++i)
-		{
-			Texture text;
-			aiString textPath;
-			aiReturn retStatus = matPtr->GetTexture(textureType, i, &textPath);
-			if (retStatus != aiReturn_SUCCESS 
-				|| textPath.length == 0)
-			{
-				std::cerr << "Warning, load texture type=" << textureType
-					<< "index= " << i << " failed with return value= "
-					<< retStatus << std::endl;
-				continue;
-			}
-			std::string absolutePath = directory + "/" + textPath.C_Str();
+
 // 			LoadedTextMapType::const_iterator it = this->loadedTextureMap.find(absolutePath);
 // 			if (it == this->loadedTextureMap.end()) // 检查是否已经加载过了
 // 			{
@@ -152,8 +143,5 @@ namespace SoftRender
 // 			{
 // 				textures.push_back(it->second);
 // 			}
-		}
-		return true;
-	}
 
 }

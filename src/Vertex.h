@@ -4,12 +4,13 @@
 
 namespace SoftRender {
 	struct Vertex{
-		Vec4f pos;
-		Vec4f viewPos;
-		Vec4f normal;
+		Vec3f pos;
+		Vec3f viewPos;
+		Vec3f normal;
 		Vec2f uv;
 		Color color;
-		Vertex():pos(Vec4f()),normal(Vec4f()), uv(Vec2f()), color(Color()){}
+		float derivZ ;
+		Vertex():pos(Vec3f()),normal(Vec3f()), uv(Vec2f()), color(Color()){}
 	};
 
 	

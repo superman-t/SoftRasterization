@@ -23,6 +23,7 @@ namespace SoftRender{
 		explicit Vec4(T _x, T _y, T _z):x(_x), y(_y), z(_z), w(0.0){}
         explicit Vec4(T xx):x(xx), y(xx), z(xx), w(xx){}
 		Vec4(Vec3<T>&v):x(v.x), y(v.y), z(v.z), w(0.0){}
+		Vec4(Vec3<T>&v, T _w):x(v.x), y(v.y), z(v.z), w(_w){}
 		Vec4(const Vec4& v) {x = v.x, y = v.y, z = v.z, w = v.w;}
     
 		Vec4<T>& operator=(const Vec4<T>& v){x = v.x; y = v.y;z = v.z;w = v.w; return *this;}

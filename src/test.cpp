@@ -33,18 +33,24 @@ void test::testRender()
 {
 	const int WIDTH = 1024, HEIGHT = 768;
 	Render render(WIDTH, HEIGHT);
-	render.SetFrustum(M_PI_2, float(WIDTH)/(float)HEIGHT, 0.1f, 1000.0f);
-	render.SetCamera(Vec3f(5.0f, 5.0f, 5.0f), Vec3f());
+	render.SetFrustum(M_PI_2, float(WIDTH)/(float)HEIGHT, 0.1f, 100.0f);
+	render.SetCamera(Vec3f(0.0f, 0.0f, 15.0f), Vec3f());
 	//render.SetLight(Vec3f(0.0f, 0.0f, 30.0f), Vec3f(0.5f, 0.0f, 0.0f), Vec3f(0.8f, 0.8f, 0.8f), Vec3f(0.5f, 0.5f, 0.5f));
 
-	Model sphere(std::string("res/sphere.obj"), Vec3f(0, 0, 0), Material());
- 	render.DrawModel(sphere, true, true);
+// 	Model sphere(std::string("res/sphere.obj"), Vec3f(2.5, 0.5, 1.5), Material());
+//    	render.DrawModel(sphere, true, false);
 
-	Model cube(std::string("res/cube.obj"), Vec3f(0, 0, -2), Material());
-	render.DrawModel(cube, true, true);
+// 	Model cube(std::string("res/cube.obj"), Vec3f(-2, 0, 2.0), Material());
+// 	render.DrawModel(cube, false, true);
 
+	render.currentMode = WireFrame;
+	Model nanosuit(std::string("res/nanosuit/nanosuit.obj"), Vec3f(-4, -5, 0), Material());
+	render.DrawModel(nanosuit, false, true);
+	render.currentMode = Textured;
+	Model nanosuit2(std::string("res/nanosuit/nanosuit.obj"), Vec3f(4, -5, 0), Material());
+	render.DrawModel(nanosuit2, false, true);
 	//  	Model bunny(std::string("res/bunny.obj"), Vec3f(0, 5, 0), Material());
 	//  	render.DrawModel(bunny, false, true);
 
-	SaveTexture(render.frameBuffer, WIDTH, HEIGHT, "screenshot.bmp");
+	SaveTexture(render.frameBuffer, WIDTH, HEIGHT, "screenshot.jpg");
 }

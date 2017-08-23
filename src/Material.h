@@ -3,12 +3,12 @@
 
 namespace SoftRender {
 	struct Material{
-		Vec4f ambient;
-		Vec4f diffuse;
-		Vec4f specular;
+		Vec3f ambient;
+		Vec3f diffuse;
+		Vec3f specular;
 
-		Material(Vec4f& _ambient, Vec4f& _diffuse, Vec4f& _specular):ambient(_ambient), diffuse(_diffuse), specular(_specular){}
-		Material():ambient(Vec4f(1.0, 1.0, 1.0)), diffuse(Vec4f(1.0, 1.0, 1.0)), specular(Vec4f(1.0, 1.0, 1.0)){}
+		Material(Vec3f& _ambient, Vec3f& _diffuse, Vec3f& _specular):ambient(_ambient), diffuse(_diffuse), specular(_specular){}
+		Material():ambient(Vec3f(1.0, 1.0, 1.0)), diffuse(Vec3f(1.0, 1.0, 1.0)), specular(Vec3f(1.0, 1.0, 1.0)){}
 	};
 }
 
