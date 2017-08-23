@@ -1,1 +1,7 @@
 /build
+cmake_*
+CMakeCache.txt
+/CMakeFiles
+/CMakeScripts
+/Debug
+SoftRender.*

@@ -5,11 +5,11 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
+ 
 namespace SoftRender
 {
 	struct Model
-	{
+	{ 
 		std::string path;
 		Material material;
 		//Texture texture;
@@ -31,7 +31,7 @@ namespace SoftRender
 		Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 		vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, 
 			string typeName);
-		unsigned int Model::TextureFromFile(Texture& texture, const string& path, const string& directory);
+		unsigned int TextureFromFile(Texture& texture, const string& path, const string& directory);
 	};
 }
 

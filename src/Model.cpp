@@ -4,7 +4,7 @@
 #include "TextureManager.h"
 
 namespace SoftRender
-{
+{ 
 	Model::Model(std::string path, Vec3f worldPos, Material m):material(m),path(path), pos(worldPos)
 	{
 		loadModel(path);
@@ -20,10 +20,8 @@ namespace SoftRender
 			cout << "ERROR::ASSIMP::" << import.GetErrorString() << endl;
 			return ;
 		}
-
+ 
 		directory = path.substr(0, path.find_last_of('/'));
-		//texturename = path.replace(path.find_last_of("."), 4, ".bmp");
-		//LoadTexture(texture, texturename);
 
 		processNode(scene->mRootNode, scene);
 	}
@@ -78,12 +76,12 @@ namespace SoftRender
 		if(mesh->mMaterialIndex > 0)
 		{
 			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-			vector<Texture> diffuseMaps = loadMaterialTextures(material, 
+			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, 
 				aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-// 			vector<Texture> specularMaps = loadMaterialTextures(material, 
-// 				aiTextureType_SPECULAR, "texture_specular");
-// 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			vector<Texture> specularMaps = loadMaterialTextures(material, 
+				aiTextureType_SPECULAR, "texture_specular");
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 // 
 // 			std::vector<Texture> normalMaps = loadMaterialTextures(material, 
 // 				aiTextureType_HEIGHT, "texture_normal");
@@ -100,12 +98,13 @@ namespace SoftRender
 	vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
 	{
 		vector<Texture> textures;
-		std::cout << mat->GetTextureCount(type);
+		std::cout << typeName << " "<< mat->GetTextureCount(type) << std::endl;
 		for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 		{
 			aiString str;
 			mat->GetTexture(type, i, &str);
 			Texture texture;
+			std::cout << "texture " << str.C_Str() << std::endl;
 			TextureFromFile(texture, str.C_Str(), directory);
 			texture.type = typeName;
 			texture.path = string(directory + "/" + str.C_Str())  ;
@@ -115,19 +114,18 @@ namespace SoftRender
 	}
 
 	/*
-	* ªÒ»°“ª∏ˆ≤ƒ÷ ÷–µƒŒ∆¿Ì
+	* Ëé∑Âèñ‰∏Ä‰∏™ÊùêË¥®‰∏≠ÁöÑÁ∫πÁêÜ
 	*/
 	unsigned int Model::TextureFromFile(Texture& texture, const string& path, const string& directory)
 	{
 		string filename = directory + "/" + path;
-		std::cout << filename << std::endl;
 		TextureManager::getInstance()->LoadTexture(texture, filename);
-		return 1;
-		}
+		return 0;
+	}
 
 
 // 			LoadedTextMapType::const_iterator it = this->loadedTextureMap.find(absolutePath);
-// 			if (it == this->loadedTextureMap.end()) // ºÏ≤È «∑Ò“—æ≠º”‘ÿπ˝¡À
+// 			if (it == this->loadedTextureMap.end()) // Ê£ÄÊü•ÊòØÂê¶Â∑≤ÁªèÂä†ËΩΩËøá‰∫Ü
 // 			{
 // 				GLuint textId = TextureHelper::load2DTexture(absolutePath.c_str());
 // 				text.id = textId;

@@ -2,7 +2,7 @@
 
 namespace SoftRender{
 
-	//计算三角形面积
+	
 	static inline float calculateArea (const Vec3f &p0, const Vec3f &p1, const Vec3f &p2) {
 		return ((p2.x - p0.x) * (p1.y - p0.y) - (p2.y - p0.y) * (p1.x - p0.x));
 	} // note that the result of edge function could be represent as area as well.
@@ -11,14 +11,14 @@ namespace SoftRender{
 	{
 		return z < zbuff;
 	}
-	//重心法插值uv坐标
+	 
 	static inline void Interpolate (const Vertex &v0, const Vertex &v1, const Vertex &v2, Vertex &v, Vec3f &w) {
 		float area = calculateArea (v0.pos, v1.pos, v2.pos);
 		w.x = calculateArea (v1.pos, v2.pos, v.pos) / area; 
 		w.y = calculateArea (v2.pos, v0.pos, v.pos) / area;
 		w.z = calculateArea (v0.pos, v1.pos, v.pos) / area;
 		v.derivZ = v0.derivZ*w.x + v1.derivZ*w.y + v2.derivZ*w.z;
-		v.pos.z = 1/v.derivZ;// 1/v.derivZ=观察空间的Z坐标
+		v.pos.z = 1/v.derivZ;// 1/v.derivZ=瑙傚療绌洪棿鐨刏鍧愭爣
 		v.uv = (v0.uv * w.x + v1.uv * w.y + v2.uv * w.z)/v.derivZ;
 		v.color = (v0.color*w.x + v1.color*w.y + v2.color*w.z)/v.derivZ;
 	} 
@@ -39,7 +39,7 @@ namespace SoftRender{
 		int delta = dy - dx;
 		int f = 0;
 
-		//斜率
+		//鏂滅巼
 		if(dy >= 0 && dy <= dx) {
 			for(int x = x0, y = y0; x <= x1; x++) {
 				SetPixel(x, y, color);
@@ -255,34 +255,14 @@ namespace SoftRender{
 		//Vec4f lightViewPos = light.position * mvMat;
 
 		// travers all triangles
-
 		for (auto &mesh : model.meshes) {
+			std::cout << "mesh's textures size " << mesh.textures.size() << std::endl;
 			for (int j = 0; j < mesh.indices.size(); j+=3)
 			{
-<<<<<<< HEAD
 				DrawTriangle(mesh, mesh.vertices[j], mesh.vertices[j+1], mesh.vertices[j+2]);
-=======
-				for (int i = 0, n = 3*j; i < 3; i++, n = i+3*j) {
-					VertexShader(mesh.vertices[n].pos, mesh.vertices[n].normal, mesh.vertices[n].uv, outVertex[i]);
-
-					if (outVertex[i].pos.z < 0.0f || outVertex[i].pos.z > 1.0f) {
-						badTriangle = true;	
-						break;
-					} // check the vertex inside or outside the view frustum
-					Ndc2Screen (outVertex[i].pos); // convert to screen coordinate
-				}
-				// skip triangles that are invisible
-				if (badTriangle || BackFaceCulling (outVertex[0].viewPos,outVertex[1].viewPos,
-					outVertex[2].viewPos)) continue;
-				// texture mode drawing
-				if (drawTex) FillTriangle (mesh, outVertex[0], outVertex[1], outVertex[2]);
-
-				// wireframe mode drawing
-				if (drawWireFrame) DrawTriangle (outVertex[0], outVertex[1], outVertex[2], Color(0, 1.0f, 0, 0 ));
->>>>>>> 11b53dbf1583022b10d8d3c2dad14fbfef220561
 			}
 		} 
 	}
-	
+
 }
 
