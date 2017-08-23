@@ -259,7 +259,27 @@ namespace SoftRender{
 		for (auto &mesh : model.meshes) {
 			for (int j = 0; j < mesh.indices.size(); j+=3)
 			{
+<<<<<<< HEAD
 				DrawTriangle(mesh, mesh.vertices[j], mesh.vertices[j+1], mesh.vertices[j+2]);
+=======
+				for (int i = 0, n = 3*j; i < 3; i++, n = i+3*j) {
+					VertexShader(mesh.vertices[n].pos, mesh.vertices[n].normal, mesh.vertices[n].uv, outVertex[i]);
+
+					if (outVertex[i].pos.z < 0.0f || outVertex[i].pos.z > 1.0f) {
+						badTriangle = true;	
+						break;
+					} // check the vertex inside or outside the view frustum
+					Ndc2Screen (outVertex[i].pos); // convert to screen coordinate
+				}
+				// skip triangles that are invisible
+				if (badTriangle || BackFaceCulling (outVertex[0].viewPos,outVertex[1].viewPos,
+					outVertex[2].viewPos)) continue;
+				// texture mode drawing
+				if (drawTex) FillTriangle (mesh, outVertex[0], outVertex[1], outVertex[2]);
+
+				// wireframe mode drawing
+				if (drawWireFrame) DrawTriangle (outVertex[0], outVertex[1], outVertex[2], Color(0, 1.0f, 0, 0 ));
+>>>>>>> 11b53dbf1583022b10d8d3c2dad14fbfef220561
 			}
 		} 
 	}

@@ -1,4 +1,3 @@
-#pragma once
 #include "Model.h"
 #include <fstream>
 #include <sstream>
@@ -6,7 +5,7 @@
 
 namespace SoftRender
 {
-	Model::Model(std::string path, Vec3f& worldPos, Material m):material(m),path(path), pos(worldPos)
+	Model::Model(std::string path, Vec3f worldPos, Material m):material(m),path(path), pos(worldPos)
 	{
 		loadModel(path);
 	}
@@ -27,8 +26,6 @@ namespace SoftRender
 		//LoadTexture(texture, texturename);
 
 		processNode(scene->mRootNode, scene);
-		
-		cout << "loadModel" << endl;
 	}
 
 
@@ -78,7 +75,7 @@ namespace SoftRender
 			}
 		}
 
-		if(mesh->mMaterialIndex >= 0)
+		if(mesh->mMaterialIndex > 0)
 		{
 			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 			vector<Texture> diffuseMaps = loadMaterialTextures(material, 
