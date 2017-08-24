@@ -45,10 +45,10 @@ void test::testRender()
 // 	render.DrawModel(cube, false, true);
 //Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/
 	render.currentMode = WireFrame;
-	Model cow(std::string("/Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/cow.obj"), Vec3f(-5, -5, 0), Material());
+	Model cow(std::string("../res/cow.obj"), Vec3f(-5, -5, 0), Material());
 	render.DrawModel(cow, false, true);
 	render.currentMode = Textured;
-	Model nanosuit2(std::string("/Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/nanosuit/nanosuit.obj"), Vec3f(5, -15, 0), Material());
+	Model nanosuit2(std::string("../res/nanosuit/nanosuit.obj"), Vec3f(5, -15, 0), Material());
 	render.DrawModel(nanosuit2, false, true);
 	//  	Model bunny(std::string("res/bunny.obj"), Vec3f(0, 5, 0), Material());
 	//  	render.DrawModel(bunny, false, true);
