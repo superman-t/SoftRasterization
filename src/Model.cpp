@@ -13,7 +13,7 @@ namespace SoftRender
 	void Model::loadModel(string path)
 	{
 		Assimp::Importer import;
-		const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate|aiProcess_FlipUVs);
+		const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate|aiProcess_FlipUVs|aiProcess_GenNormals);
 
 		if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
@@ -51,7 +51,7 @@ namespace SoftRender
 		{
 			Vertex vertex;
 			if (mesh->HasPositions())
-				vertex.pos = Vec3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+				vertex.modelPos = Vec3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 			if (mesh->HasNormals())
 				vertex.normal = Vec3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 			if (mesh->mTextureCoords[0])
@@ -67,6 +67,8 @@ namespace SoftRender
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
+			if (face.mNumIndices != 3)
+				std::cout << face.mNumIndices;
 			for (unsigned int j = 0; j < face.mNumIndices; j++)
 			{
 				indices.push_back(face.mIndices[j]);
@@ -79,9 +81,9 @@ namespace SoftRender
 			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, 
 				aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			vector<Texture> specularMaps = loadMaterialTextures(material, 
-				aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+// 			vector<Texture> specularMaps = loadMaterialTextures(material, 
+// 				aiTextureType_SPECULAR, "texture_specular");
+// 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 // 
 // 			std::vector<Texture> normalMaps = loadMaterialTextures(material, 
 // 				aiTextureType_HEIGHT, "texture_normal");
@@ -104,10 +106,12 @@ namespace SoftRender
 			aiString str;
 			mat->GetTexture(type, i, &str);
 			Texture texture;
-			std::cout << "texture " << str.C_Str() << std::endl;
-			TextureFromFile(texture, str.C_Str(), directory);
+			std::string path(str.C_Str());
+			if (path.find("materials") != string::npos)
+				path = path.substr(path.find("materials"), path.length());
+			TextureFromFile(texture, path, directory);
 			texture.type = typeName;
-			texture.path = string(directory + "/" + str.C_Str())  ;
+			texture.path = string(directory + "/" + path)  ;
 			textures.push_back(texture);
 		}
 		return textures;
@@ -119,6 +123,7 @@ namespace SoftRender
 	unsigned int Model::TextureFromFile(Texture& texture, const string& path, const string& directory)
 	{
 		string filename = directory + "/" + path;
+		std::cout << "texture " << filename << std::endl;
 		TextureManager::getInstance()->LoadTexture(texture, filename);
 		return 0;
 	}

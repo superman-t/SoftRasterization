@@ -143,6 +143,16 @@ namespace SoftRender
         return v;
     }
 
+	Color operator*(const Color& c, const Vec3f& m )
+	{
+		Color v;
+		v.R = c.R * m.x;
+		v.G = c.G * m.y;
+		v.B = c.B * m.z;
+		v.A = c.A;
+		return v;
+	}
+
     Vec4f operator*(const Vec4f& d, const Mat4f& m )
     {
         Vec4f v;
@@ -154,28 +164,14 @@ namespace SoftRender
         return v;
     }
 
-    void VertexShader(Mat4f& mv, Mat4f& p, Vertex& inVertex, Vertex& outVertex)
-    {
-        Mat4f mvp = mv*p;
-        Vec4f v = Vec4f(inVertex.pos, 1.0f)*(mvp);
-        outVertex.pos.x = v.x;
-        outVertex.pos.y = v.y;
-        outVertex.pos.z = v.z;
+    
 
-        outVertex.derivZ = 1.0f/v.w;
-
-        outVertex.uv = inVertex.uv/v.w;
-        outVertex.color = inVertex.color/v.w;
-
-        outVertex.viewPos = inVertex.pos*mv;
-    }
-
-    bool Clip(Vertex& v)
+    bool Clip(VertexOut& v)
     {
         //opengl cvv,x[-1,1], y[-1,1],z[-1,1]
-        if (v.pos.x >= -1 && v.pos.x <= 1
-            &&v.pos.y >= -1 && v.pos.y <= 1
-            &&v.pos.z >= -1 && v.pos.z <= 1)
+        if (v.projPos.x >= -1 && v.projPos.x <= 1
+            &&v.projPos.y >= -1 && v.projPos.y <= 1
+            &&v.projPos.z >= -1 && v.projPos.z <= 1)
             return false;
         return true;
     }
@@ -223,8 +219,58 @@ namespace SoftRender
     }
 
 
-    Color PixelShader(Vertex& inVertex, Texture& texture)
+	void VertexShader(Mat4f& mv, Mat4f& p, Vertex& inVertex, VertexOut& outVertex)
     {
-        return TextureMap(texture, inVertex.uv);
+        Mat4f mvp = mv*p;
+		Mat4f nmv = mv.Inverse().Transpose();
+        Vec4f v = Vec4f(inVertex.modelPos, 1.0f)*(mvp);
+        outVertex.projPos.x = v.x;
+        outVertex.projPos.y = v.y;
+        outVertex.projPos.z = v.z;
+
+        outVertex.derivZ = 1.0f/v.w;
+
+        outVertex.uv = inVertex.uv*outVertex.derivZ;
+        outVertex.color = inVertex.color*outVertex.derivZ;
+		//Todo: fix worldPos
+		outVertex.worldPos = inVertex.modelPos;
+        outVertex.viewPos = inVertex.modelPos*mv;
+
+		outVertex.normal = inVertex.normal;
     }
+
+    Color PixelShader(VertexOut& inVertex, Texture& texture, Light& light)
+    {
+		float ambientStrength = 0.1;
+		Color ambient = light.color*ambientStrength;
+		ambient.A = 1.0;
+		Vec3f norm = inVertex.normal.Normalize();
+		Vec3f lightDir = (light.worldPos - inVertex.worldPos).Normalize();
+		//std::cout << lightDir ;
+		float diff = std::max(norm.Dot(lightDir), 0.0f);
+		Color diffuse = light.color*diff;
+		diffuse.A = 1.0;
+		
+		Color result = ambient + diffuse;
+// 		std::cout << result.R << 
+// 			" "<< result.G << " " <<result.B << std::endl;
+        return TextureMap(texture, inVertex.uv)*result;
+    }
+
+	Color PixelShader(VertexOut& inVertex, Color& color, Light& light)
+	{
+		float ambientStrength = 0.1;
+		Color ambient = light.color*ambientStrength;
+		ambient.A = 1.0;
+		Vec3f norm = inVertex.normal.Normalize();
+		//std::cout << norm;
+		Vec3f lightDir = (light.worldPos - inVertex.worldPos).Normalize();
+		float diff = std::max(lightDir.Dot(norm), 0.0f);
+		Color diffuse = light.color*diff;
+		diffuse.A = 1.0;
+
+		Color result = ambient + diffuse;
+		 		
+		return color*result;
+	}
 }

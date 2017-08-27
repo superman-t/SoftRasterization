@@ -64,11 +64,12 @@ namespace SoftRender
 	void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string file);
 	bool LoadTexture (Texture &texture, std::string file);
 
-	void VertexShader(Mat4f& mv, Mat4f& p, Vertex& inVertex, Vertex& outVertex);
-	bool Clip(Vertex& v);
+	void VertexShader(Mat4f& mv, Mat4f& p, Vertex& inVertex, VertexOut& outVertex);
+	bool Clip(VertexOut& v);
 	void Ndc2Screen (Vec3f &pos, float width, float height);
 	bool BackFaceCulling (const Vec3f &p0, const Vec3f &p1, const Vec3f &p2);
-	Color PixelShader(Vertex& inVertex, Texture& texture);
+	Color PixelShader(VertexOut& inVertex, Texture& texture, Light& light);
+	Color PixelShader(VertexOut& inVertex, Color& color, Light& light);
 	Color BilinearFilter(Texture& texture, float s, float t);
 	Color NearestFilter(Texture& texture, int s, int t);
 };

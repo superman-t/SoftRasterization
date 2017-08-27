@@ -28,7 +28,7 @@ namespace SoftRender
 		//       2           grey, alpha
 		//       3           red, green, blue
 		//       4           red, green, blue, alpha
-		if(textureMaps.find(file) != textureMaps.end()) return true;
+		
 
 		int comp;
 		unsigned char* tmp = stbi_load(file.c_str(), &texture.width, &texture.height, &comp, STBI_rgb);
@@ -37,7 +37,7 @@ namespace SoftRender
 			std::cout << "load file failed" << std::endl;
 			return false;
 		}
-		
+		if(textureMaps.find(file) != textureMaps.end()) return true;
 		//std::cout << "load texture:" << file << std::endl;
 		
 

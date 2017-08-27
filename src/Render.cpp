@@ -12,15 +12,20 @@ namespace SoftRender{
 		return z < zbuff;
 	}
 	 
-	static inline void Interpolate (const Vertex &v0, const Vertex &v1, const Vertex &v2, Vertex &v, Vec3f &w) {
-		float area = calculateArea (v0.pos, v1.pos, v2.pos);
-		w.x = calculateArea (v1.pos, v2.pos, v.pos) / area; 
-		w.y = calculateArea (v2.pos, v0.pos, v.pos) / area;
-		w.z = calculateArea (v0.pos, v1.pos, v.pos) / area;
+	static inline void Interpolate (const VertexOut &v0, const VertexOut &v1, const VertexOut &v2, VertexOut &v, Vec3f &w) {
+		float area = calculateArea (v0.projPos, v1.projPos, v2.projPos);
+		w.x = calculateArea (v1.projPos, v2.projPos, v.projPos) / area; 
+		w.y = calculateArea (v2.projPos, v0.projPos, v.projPos) / area;
+		w.z = calculateArea (v0.projPos, v1.projPos, v.projPos) / area;
 		v.derivZ = v0.derivZ*w.x + v1.derivZ*w.y + v2.derivZ*w.z;
-		v.pos.z = 1/v.derivZ;// 1/v.derivZ=观察空间的Z坐标
+		v.projPos.z = 1/v.derivZ;// 1/v.derivZ=观察空间的Z坐标
+
 		v.uv = (v0.uv * w.x + v1.uv * w.y + v2.uv * w.z)/v.derivZ;
 		v.color = (v0.color*w.x + v1.color*w.y + v2.color*w.z)/v.derivZ;
+
+		v.normal = (v0.normal*w.x + v1.normal*w.y + v2.normal*w.z);
+		v.worldPos = (v0.worldPos*w.x + v1.worldPos*w.y + v2.worldPos*w.z);
+		v.viewPos = (v0.viewPos*w.x + v1.viewPos * w.y + v2.viewPos*w.z)/v.derivZ;
 	} 
 	
 	void Render::SetPixel (int x, int y, const Color &color, float depth = 0) {
@@ -75,10 +80,10 @@ namespace SoftRender{
 		}         
 	} // bresenham line algorithm
 
-	void Render::DrawTriangle (const Vertex &v0, const Vertex &v1, const Vertex &v2, const Color &color) {
-		DrawLine (v0.pos, v1.pos, color); 
-		DrawLine (v1.pos, v2.pos, color); 
-		DrawLine (v0.pos, v2.pos, color);
+	void Render::DrawTriangle (const VertexOut &v0, const VertexOut &v1, const VertexOut &v2, const Color &color) {
+		DrawLine (v0.projPos, v1.projPos, color); 
+		DrawLine (v1.projPos, v2.projPos, color); 
+		DrawLine (v0.projPos, v2.projPos, color);
 	}
 
 	static bool OnSameSide(Vec3f a, Vec3f b, Vec3f c, Vec3f p)
@@ -201,13 +206,13 @@ namespace SoftRender{
 		return u + v <= 1 ;
 	}
 
-	void Render::Rasterization(Mesh& mesh, Vertex& v1, Vertex& v2, Vertex& v3)
+	void Render::Rasterization(Mesh& mesh, VertexOut& v1, VertexOut& v2, VertexOut& v3)
 	{
 		// Bounding rectangle
-		int minx = min3(v1.pos.x, v2.pos.x, v3.pos.x);
-		int maxx = max3(v1.pos.x, v2.pos.x, v3.pos.x);
-		int miny = min3(v1.pos.y, v2.pos.y, v3.pos.y);
-		int maxy = max3(v1.pos.y, v2.pos.y, v3.pos.y);
+		int minx = min3(v1.projPos.x, v2.projPos.x, v3.projPos.x);
+		int maxx = max3(v1.projPos.x, v2.projPos.x, v3.projPos.x);
+		int miny = min3(v1.projPos.y, v2.projPos.y, v3.projPos.y);
+		int maxy = max3(v1.projPos.y, v2.projPos.y, v3.projPos.y);
 
 		Vec3f weight = Vec3f();
 		for(int y = miny; y <= maxy; y++)
@@ -215,29 +220,34 @@ namespace SoftRender{
 			for(int x = minx; x <= maxx; x++)
 			{
 				
-				Vertex v; v.pos = Vec3f(x+0.5, y+0.5, 0);
-				if (!PointInTrangleBySameSide(v1.pos, v2.pos, v3.pos, v.pos)) continue;
+				VertexOut v; v.projPos = Vec3f(x+0.5, y+0.5, 0);
+				if (!PointInTrangleBySameSide(v1.projPos, v2.projPos, v3.projPos, v.projPos)) continue;
 				Interpolate(v1, v2, v3, v, weight);
-				if (zTest(v.pos.z, depthBuffer[x+y*width])) 
-					SetPixel(x, y, PixelShader(v, mesh.textures[0]), v.pos.z);
+				if (zTest(v.projPos.z, depthBuffer[x+y*width])) {
+					if (mesh.textures.size() > 0)
+						SetPixel(x, y, PixelShader(v, mesh.textures[0], light), v.projPos.z);
+					else
+						SetPixel(x, y, PixelShader(v, Color(1, 0.5, 0.31), light), v.projPos.z);
+				}
+					
 			}
 		}
 	}
 
-	void Render::DrawTriangle(Mesh& mesh, Vertex& v0, Vertex& v1, Vertex&v2)
+	void Render::DrawMesh(Mesh& mesh, Vertex& v0, Vertex& v1, Vertex&v2)
 	{
-		Vertex outVertex[3];
+		VertexOut outVertex[3];
 		VertexShader(mvMat, projMat, v0, outVertex[0]);
 		VertexShader(mvMat, projMat, v1, outVertex[1]);
 		VertexShader(mvMat, projMat, v2, outVertex[2]);
 		for(auto& v : outVertex)
 		{
 			if (Clip(v)) return;
-			Ndc2Screen (v.pos, width, height);
+			Ndc2Screen (v.projPos, width, height);
 		}
 
 		if (BackFaceCulling (outVertex[0].viewPos,outVertex[1].viewPos,outVertex[2].viewPos)) 
-			return;
+ 			return;
 		if (currentMode == Textured)
 		{
 			Rasterization(mesh, outVertex[0], outVertex[1], outVertex[2]);
@@ -245,22 +255,22 @@ namespace SoftRender{
 			DrawTriangle (outVertex[0], outVertex[1], outVertex[2], Color(0, 1.0f, 0, 0 ));
 		}
 	}
-	void Render::DrawModel (Model &model, bool drawTex = true, bool drawWireFrame = false) {
+	void Render::DrawModel (Model &model) {
 		mMat = ModelMatrix(model.pos);
 		mvMat = mMat * viewMat;
 		mvpMat = mvMat * projMat;
 		nmvMat = mvMat.Inverse().Transpose ();
 
 		// we need light position(in view space) in pixel shader
-		//Vec4f lightViewPos = light.position * mvMat;
+		light.viewPos = light.worldPos * mvMat;
 
-		// travers all triangles
-		for (auto &mesh : model.meshes) {
-			std::cout << "mesh's textures size " << mesh.textures.size() << std::endl;
+		for (int i = 0; i < model.meshes.size(); i++) {
+			Mesh mesh = model.meshes[i];
 			for (int j = 0; j < mesh.indices.size(); j+=3)
 			{
-				DrawTriangle(mesh, mesh.vertices[j], mesh.vertices[j+1], mesh.vertices[j+2]);
+				DrawMesh(mesh, mesh.vertices[mesh.indices[j]], mesh.vertices[mesh.indices[j+1]], mesh.vertices[mesh.indices[j+2]]);
 			}
+			
 		} 
 	}
 

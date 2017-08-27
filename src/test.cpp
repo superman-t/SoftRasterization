@@ -35,21 +35,23 @@ void test::testRender()
 	Render render(WIDTH, HEIGHT);
 
 	render.SetFrustum(M_PI_2, float(WIDTH)/(float)HEIGHT, 0.1f, 100.0f);
-	render.SetCamera(Vec3f(15.0f, 15.0f, 15.0f), Vec3f());
-	//render.SetLight(Vec3f(0.0f, 0.0f, 30.0f), Vec3f(0.5f, 0.0f, 0.0f), Vec3f(0.8f, 0.8f, 0.8f), Vec3f(0.5f, 0.5f, 0.5f));
+	render.SetCamera(Vec3f(0.0f, 0.0f, 15.0f), Vec3f());
+	render.SetLight(Vec3f(0.0f, 0.0f, 0.6f), Color(1,1,1));
 
-// 	Model sphere(std::string("res/sphere.obj"), Vec3f(2.5, 0.5, 1.5), Material());
-//    	render.DrawModel(sphere, true, false);
-
-// 	Model cube(std::string("res/cube.obj"), Vec3f(-2, 0, 2.0), Material());
-// 	render.DrawModel(cube, false, true);
-//Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/
-	render.currentMode = WireFrame;
-	Model cow(std::string("../res/cow.obj"), Vec3f(-5, -5, 0), Material());
-	render.DrawModel(cow, false, true);
 	render.currentMode = Textured;
-	Model nanosuit2(std::string("../res/nanosuit/nanosuit.obj"), Vec3f(5, -15, 0), Material());
-	render.DrawModel(nanosuit2, false, true);
+	Model sphere(std::string("../res/cube.obj"), Vec3f(-5.0f, 0.0, 0.0), Material());
+	render.DrawModel(sphere);
+
+	render.SetLight(Vec3f(-10.0f, 5.0f, 4.0f), Color(1,1,1));
+	Model cube(std::string("../res/nanosuit/nanosuit.obj"), Vec3f(5.0f, -5.0, -5.0), Material());
+	render.DrawModel(cube);
+//Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/
+// 	render.currentMode = Textured;
+// 	Model cow(std::string("../res/monkey_king/monkey_king_econ.fbx"), Vec3f(0, 0, 0), Material());
+// 	render.DrawModel(cow, false, true);
+// 	render.currentMode = Textured;
+// 	Model nanosuit2(std::string("../res/crystal_maiden/crystal_maiden_econ.fbx"), Vec3f(5, -15, 0), Material());
+	//render.DrawModel(nanosuit2, false, true);
 	//  	Model bunny(std::string("res/bunny.obj"), Vec3f(0, 5, 0), Material());
 	//  	render.DrawModel(bunny, false, true);
 
