@@ -5,7 +5,7 @@
 
 namespace SoftRender
 { 
-	Model::Model(std::string path, Vec3f worldPos, Material m):material(m),path(path), pos(worldPos)
+	Model::Model(std::string path, Vec3f worldPos, Material m):path(path), pos(worldPos),material(m)
 	{
 		loadModel(path);
 	}
@@ -45,7 +45,9 @@ namespace SoftRender
 	{
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
-		std::vector<Texture> textures;
+		std::vector<Texture> ambientTextures;
+		std::vector<Texture> diffuseTextures;
+		std::vector<Texture> specularTextures;
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
@@ -77,13 +79,23 @@ namespace SoftRender
 
 		if(mesh->mMaterialIndex > 0)
 		{
-			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, 
+			aiMaterial *mat = scene->mMaterials[mesh->mMaterialIndex];
+
+			//环境光贴图
+			std::vector<Texture> ambientMaps = loadMaterialTextures(mat, 
+				aiTextureType_AMBIENT, "texture_ambient");
+			ambientTextures.insert(ambientTextures.end(), ambientMaps.begin(), ambientMaps.end());
+
+
+			//漫反射贴图
+			std::vector<Texture> diffuseMaps = loadMaterialTextures(mat, 
 				aiTextureType_DIFFUSE, "texture_diffuse");
-			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-// 			vector<Texture> specularMaps = loadMaterialTextures(material, 
-// 				aiTextureType_SPECULAR, "texture_specular");
-// 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			diffuseTextures.insert(diffuseTextures.end(), diffuseMaps.begin(), diffuseMaps.end());
+
+			//镜面贴图
+			vector<Texture> specularMaps = loadMaterialTextures(mat, 
+				aiTextureType_SPECULAR, "texture_specular");
+			specularTextures.insert(specularTextures.end(), specularMaps.begin(), specularMaps.end());
 // 
 // 			std::vector<Texture> normalMaps = loadMaterialTextures(material, 
 // 				aiTextureType_HEIGHT, "texture_normal");
@@ -93,7 +105,7 @@ namespace SoftRender
 // 				aiTextureType_AMBIENT, "texture_height");
 // 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 		}
-		return Mesh(vertices, indices, textures);
+		return Mesh(vertices, indices, ambientTextures, diffuseTextures, specularTextures);
 		//return Mesh(vertices, indices, std::make_shared<Texture>(texture));
 	}
 

@@ -29,10 +29,8 @@ namespace SoftRender{
 	} 
 	
 	void Render::SetPixel (int x, int y, const Color &color, float depth = 0) {
-		if (x >= 0 && x < width && y >= 0 && y < height) {
-			frameBuffer[x + y * width] = color;
-			depthBuffer[x+y*width] = depth;
-		}
+		frameBuffer[x + y * width] = color;
+		depthBuffer[x+y*width] = depth;
 	} 
 
 	void Render::DrawLine (const Vec3f &p0, const Vec3f &p1, const Color &color) {
@@ -224,10 +222,14 @@ namespace SoftRender{
 				if (!PointInTrangleBySameSide(v1.projPos, v2.projPos, v3.projPos, v.projPos)) continue;
 				Interpolate(v1, v2, v3, v, weight);
 				if (zTest(v.projPos.z, depthBuffer[x+y*width])) {
-					if (mesh.textures.size() > 0)
-						SetPixel(x, y, PixelShader(v, mesh.textures[0], light), v.projPos.z);
+					if (mesh.diffuseTextures.size() > 0 && mesh.specularTextures.size() > 0)
+						SetPixel(x, y, PixelShader(v, mesh, light, cameraPos), v.projPos.z);
 					else
-						SetPixel(x, y, PixelShader(v, Color(1, 0.5, 0.31), light), v.projPos.z);
+						SetPixel(x, y,  PixelShader(v, light, cameraPos, material), v.projPos.z);
+// 					if (mesh.textures.size() > 0)
+// 						SetPixel(x, y, PixelShader(v, mesh.textures[0], light, cameraPos, material), v.projPos.z);
+// 					else
+// 						SetPixel(x, y, PixelShader(v, Color(1, 1, 1), light, cameraPos, material), v.projPos.z);
 				}
 					
 			}
@@ -237,9 +239,9 @@ namespace SoftRender{
 	void Render::DrawMesh(Mesh& mesh, Vertex& v0, Vertex& v1, Vertex&v2)
 	{
 		VertexOut outVertex[3];
-		VertexShader(mvMat, projMat, v0, outVertex[0]);
-		VertexShader(mvMat, projMat, v1, outVertex[1]);
-		VertexShader(mvMat, projMat, v2, outVertex[2]);
+		VertexShader(mMat, viewMat, projMat, v0, outVertex[0]);
+		VertexShader(mMat, viewMat, projMat, v1, outVertex[1]);
+		VertexShader(mMat, viewMat, projMat, v2, outVertex[2]);
 		for(auto& v : outVertex)
 		{
 			if (Clip(v)) return;
@@ -262,10 +264,12 @@ namespace SoftRender{
 		nmvMat = mvMat.Inverse().Transpose ();
 
 		// we need light position(in view space) in pixel shader
-		light.viewPos = light.worldPos * mvMat;
-
+		light.viewPos = MultPointMatrix(light.worldPos, mvMat);
+		material = model.material;
+		
 		for (int i = 0; i < model.meshes.size(); i++) {
 			Mesh mesh = model.meshes[i];
+			std::cout << mesh.diffuseTextures.size() << " " << mesh.specularTextures.size() << std::endl;
 			for (int j = 0; j < mesh.indices.size(); j+=3)
 			{
 				DrawMesh(mesh, mesh.vertices[mesh.indices[j]], mesh.vertices[mesh.indices[j+1]], mesh.vertices[mesh.indices[j+2]]);

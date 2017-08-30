@@ -12,7 +12,6 @@ namespace SoftRender
 	{ 
 		std::string path;
 		Material material;
-		//Texture texture;
 		Vec3f pos;
 		vector<Mesh> meshes;
 		Model(std::string path, Vec3f worldPos, Material m);
@@ -24,7 +23,6 @@ namespace SoftRender
         }
 	private:
 		string directory;
-		std::string texturename;
 
 		void loadModel(string path);
 		void processNode(aiNode *node, const aiScene *scene);

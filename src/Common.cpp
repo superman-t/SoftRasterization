@@ -23,7 +23,6 @@ namespace SoftRender
         PNG, JPG, BMP
     };
     
-
     //png, jpg, jpeg, bmp, tga
     void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string file)
     {
@@ -68,33 +67,6 @@ namespace SoftRender
         delete[] data;
     }
 
-    /*bool LoadTexture (Texture &texture, std::string file) {
-        //     N=#comp     components
-        //       1           grey
-        //       2           grey, alpha
-        //       3           red, green, blue
-        //       4           red, green, blue, alpha
-        int comp;
-        unsigned char* tmp = stbi_load(file.c_str(), &texture.width, &texture.height, &comp, STBI_rgb);
-        if (tmp == NULL)
-        {
-            std::cout << "load file failed" << std::endl;
-            return false;
-        }
-
-        int count = texture.width * texture.height * STBI_rgb;
-
-        texture.data.resize (texture.width * texture.height);
-        count = 0;
-        for (auto &color : texture.data) {
-            color = Color(tmp[count + 2] / 255.0f, tmp[count + 1] / 255.0f, tmp[count + 0] / 255.0f );
-            count += STBI_rgb;
-        }
-        
-        stbi_image_free(tmp);
-        return true;
-    }*/
-
     // projection Matrix4
     Mat4f Perspective(float radians, float ratio, float near, float far)
     {
@@ -122,7 +94,6 @@ namespace SoftRender
         return m;
     }
 
-
     Mat4f ViewMatrix(const Vec3f& look, const Vec3f& at, const Vec3f& up)
     {
         Vec3f zaxis = (look - at).Normalize();
@@ -131,16 +102,6 @@ namespace SoftRender
         Vec3f w(look.x, look.y, look.z);//pos in world space
         Mat4f m(xaxis, yaxis, zaxis, w);
         return m.Inverse();//world space to view space's matrix = (camera in world space's pos)'s inverse
-    }
-
-    Vec3f operator*(const Vec3f& d, const Mat4f& m )
-    {
-        Vec3f v;
-        float w = d.x*m[0][3] + d.y*m[1][3] + d.z*m[2][3] + m[3][3];
-        v.x = (d.x*m[0][0] + d.y*m[1][0] + d.z*m[2][0] + m[3][0])/w;
-        v.y = (d.x*m[0][1] + d.y*m[1][1] + d.z*m[2][1] + m[3][1])/w;
-        v.z = (d.x*m[0][2] + d.y*m[1][2] + d.z*m[2][2] + m[3][2])/w;
-        return v;
     }
 
 	Color operator*(const Color& c, const Vec3f& m )
@@ -156,11 +117,10 @@ namespace SoftRender
     Vec4f operator*(const Vec4f& d, const Mat4f& m )
     {
         Vec4f v;
-        float w = d.x*m[0][3] + d.y*m[1][3] + d.z*m[2][3] + m[3][3];
-        v.x = (d.x*m[0][0] + d.y*m[1][0] + d.z*m[2][0] + m[3][0])/w;
-        v.y = (d.x*m[0][1] + d.y*m[1][1] + d.z*m[2][1] + m[3][1])/w;
-        v.z = (d.x*m[0][2] + d.y*m[1][2] + d.z*m[2][2] + m[3][2])/w;
-        v.w = w;
+        v.w = d.x*m[0][3] + d.y*m[1][3] + d.z*m[2][3] + m[3][3];
+        v.x = (d.x*m[0][0] + d.y*m[1][0] + d.z*m[2][0] + m[3][0]);
+        v.y = (d.x*m[0][1] + d.y*m[1][1] + d.z*m[2][1] + m[3][1]);
+        v.z = (d.x*m[0][2] + d.y*m[1][2] + d.z*m[2][2] + m[3][2]);
         return v;
     }
 
@@ -219,58 +179,93 @@ namespace SoftRender
     }
 
 
-	void VertexShader(Mat4f& mv, Mat4f& p, Vertex& inVertex, VertexOut& outVertex)
+	void VertexShader(Mat4f& model, Mat4f& view, Mat4f& proj, Vertex& inVertex, VertexOut& outVertex)
     {
-        Mat4f mvp = mv*p;
-		Mat4f nmv = mv.Inverse().Transpose();
+        Mat4f mvp = model * view * proj;
+		Mat4f nmv = model * view.Inverse().Transpose();
         Vec4f v = Vec4f(inVertex.modelPos, 1.0f)*(mvp);
-        outVertex.projPos.x = v.x;
-        outVertex.projPos.y = v.y;
-        outVertex.projPos.z = v.z;
+
+        outVertex.projPos.x = v.x/v.w;
+        outVertex.projPos.y = v.y/v.w;
+        outVertex.projPos.z = v.z/v.w;
 
         outVertex.derivZ = 1.0f/v.w;
 
         outVertex.uv = inVertex.uv*outVertex.derivZ;
         outVertex.color = inVertex.color*outVertex.derivZ;
-		//Todo: fix worldPos
-		outVertex.worldPos = inVertex.modelPos;
-        outVertex.viewPos = inVertex.modelPos*mv;
 
-		outVertex.normal = inVertex.normal;
+		outVertex.worldPos = MultPointMatrix(inVertex.modelPos, model);
+        outVertex.viewPos = MultPointMatrix(inVertex.modelPos, model*view);
+
+		outVertex.normal = MultDirMatrix(inVertex.normal, model.Inverse().Transpose());
     }
 
-    Color PixelShader(VertexOut& inVertex, Texture& texture, Light& light)
+	Vec3f Reflect(Vec3f& incident, Vec3f& normal)
+	{
+		return incident - normal*(2.0*(normal.Dot(incident)));
+	}
+
+    Color PixelShader(VertexOut& inVertex, Texture& texture, Light& light, Vec3f& cameraPos, Material& material)
     {
-		float ambientStrength = 0.1;
-		Color ambient = light.color*ambientStrength;
-		ambient.A = 1.0;
+		Color ambient = light.ambient*material.ambient;
+
 		Vec3f norm = inVertex.normal.Normalize();
 		Vec3f lightDir = (light.worldPos - inVertex.worldPos).Normalize();
-		//std::cout << lightDir ;
-		float diff = std::max(norm.Dot(lightDir), 0.0f);
-		Color diffuse = light.color*diff;
-		diffuse.A = 1.0;
-		
-		Color result = ambient + diffuse;
-// 		std::cout << result.R << 
-// 			" "<< result.G << " " <<result.B << std::endl;
+		float diff = std::max(lightDir.Dot(norm), 0.0f);
+		Color diffuse = light.diffuse*(material.diffuse*diff);
+
+
+		Vec3f viewDir = (cameraPos - inVertex.worldPos).Normalize();
+		Vec3f reflectDir = Reflect(-lightDir, norm).Normalize();
+		float spec = std::pow(std::max(viewDir.Dot(reflectDir), 0.0f), 128);
+		Color specular = light.specular * (material.specular*spec);
+
+		Color result = ambient + diffuse + specular;
+		result.A = 1.0;
         return TextureMap(texture, inVertex.uv)*result;
     }
 
-	Color PixelShader(VertexOut& inVertex, Color& color, Light& light)
+	
+
+	Color PixelShader(VertexOut& inVertex, Mesh& mesh, Light& light, Vec3f& cameraPos)
 	{
-		float ambientStrength = 0.1;
-		Color ambient = light.color*ambientStrength;
-		ambient.A = 1.0;
+		Color ambient = light.ambient*TextureMap(mesh.diffuseTextures[0], inVertex.uv);
+
 		Vec3f norm = inVertex.normal.Normalize();
-		//std::cout << norm;
 		Vec3f lightDir = (light.worldPos - inVertex.worldPos).Normalize();
 		float diff = std::max(lightDir.Dot(norm), 0.0f);
-		Color diffuse = light.color*diff;
-		diffuse.A = 1.0;
+		Color diffuse = light.diffuse*(TextureMap(mesh.diffuseTextures[0], inVertex.uv)*diff);
 
-		Color result = ambient + diffuse;
-		 		
-		return color*result;
+
+		Vec3f viewDir = (cameraPos - inVertex.worldPos).Normalize();
+		Vec3f reflectDir = Reflect(-lightDir, norm).Normalize();
+		float spec = std::pow(std::max(viewDir.Dot(reflectDir), 0.0f), 128);
+		Color specular = light.specular * (TextureMap(mesh.specularTextures[0], inVertex.uv)*spec);
+
+		Color result = ambient + diffuse + specular;
+		result.A = 1.0;
+
+		return result;
+	}
+
+	Color PixelShader(VertexOut& inVertex, Light& light, Vec3f& cameraPos, Material& material)
+	{
+		Color ambient = light.ambient*material.ambient;
+
+		Vec3f norm = inVertex.normal.Normalize();
+		Vec3f lightDir = (light.worldPos - inVertex.worldPos).Normalize();
+		float diff = std::max(lightDir.Dot(norm), 0.0f);
+		Color diffuse = light.diffuse*(material.diffuse*diff);
+
+
+		Vec3f viewDir = (cameraPos - inVertex.worldPos).Normalize();
+		Vec3f reflectDir = Reflect(-lightDir, norm).Normalize();
+		float spec = std::pow(std::max(viewDir.Dot(reflectDir), 0.0f), 128);
+		Color specular = light.specular * (material.specular*spec);
+
+		Color result = ambient + diffuse + specular;
+		result.A = 1.0;
+
+		return result;
 	}
 }

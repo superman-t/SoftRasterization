@@ -11,7 +11,9 @@ namespace SoftRender {
 		std::vector<Color> frameBuffer;
 		std::vector<float> depthBuffer;
 		Mat4f mMat, projMat, viewMat, mvMat, mvpMat, nmvMat;
+		Vec3f cameraPos;
 		Light light;
+		Material material;
 		DrawMode currentMode;
 
 		Render (int w, int h) : width (w), height (h), frameBuffer (w * h, Color(0.1, 0.1, 0.1f, 1 )), depthBuffer (w * h, std::numeric_limits<float>::max ()) {
@@ -20,21 +22,14 @@ namespace SoftRender {
 
 		void SetFrustum (float hfov, float ratio, float n, float f) { projMat = Perspective (hfov, ratio, n, f); }
 
-		void SetCamera (const Vec3f &look, const Vec3f &at) { viewMat = ViewMatrix (look, at, Vec3f(0.0f, 1.0f, 0.0f)); }
-
-
-		void SetLight (const Vec3f &worldPos, const Color& lightColor, const Vec3f &ambi, const Vec3f &diff, const Vec3f &spec) {
-			light.worldPos = worldPos;
-			light.color = lightColor;
-			light.ambient = ambi; 
-			light.diffuse = diff;	
-			light.specular = spec;
+		void SetCamera (const Vec3f &look) { 
+			cameraPos = look;
+			viewMat = ViewMatrix (look, Vec3f(), Vec3f(0.0f, 1.0f, 0.0f)); 
 		}
 
-		void SetLight (const Vec3f &worldPos, const Color& lightColor)
-		{
-			light.worldPos = worldPos;
-			light.color = lightColor;
+
+		void SetLight (const Light& _light) {
+			light = _light;
 		}
 
 		void DrawModel (Model &model);
