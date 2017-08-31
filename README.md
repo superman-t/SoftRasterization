@@ -1,7 +1,7 @@
 # SoftRasterization（[软光栅化工程](https://github.com/superman-t/SoftRasterization)）
 历时一个月的软光栅工程基本告一段落，这段时间学的东西感觉很值呀，果断是**预则立不预则废**。先上结果，下图为软光栅渲染的出的3D模型，线框模式的牛，纹理模式的Dota2冰女模型，以及纳米粒子模型。
 <div  align="center">    
-<img src="./screenshot.jpg" width = "512" height = "383" alt="图片名称" align=center />
+<img src="./screenshot.jpg" width = "512" height = "383" alt="渲染图" align=center />
 </div>
 
 ### 主要特性 ###
@@ -44,8 +44,18 @@
     ./SoftRender
     运行后将在当前目录生成渲染出来的screenshot.jpg文件
 
-
-
+### 开发过程手稿 ###
+<div  align="left">    
+<img src="./tmp/0.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/1.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/2.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/3.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/4.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/5.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/6.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/7.jpg" width = "280" height = "280" alt="渲染图" align=center />
+<img src="./tmp/8.jpg" width = "280" height = "280" alt="渲染图" align=center />
+</div>
 
 
 
