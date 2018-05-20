@@ -12,7 +12,7 @@ namespace SoftRender {
 		
 
 		Light():worldPos(Vec3f(1.0, 1.0, 1.0)), ambient(Color()), diffuse(Color()), specular(Color()){}
-		Light(Vec3f& _pos, Color& _ambient, Color& _diffuse, Color& _specular):worldPos(_pos),
+		Light(const Vec3f& _pos, const Color& _ambient, const Color& _diffuse, const Color& _specular):worldPos(_pos),
 			ambient(_ambient), diffuse(_diffuse), specular(_specular){}
 		Light(Light& _light)
 		{

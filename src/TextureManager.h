@@ -19,7 +19,7 @@ namespace SoftRender
 		static TextureManager* getInstance();
 		std::vector<Color> getTexture(std::string& filepath);
 		
-		std::map<std::string, std::vector<Color>> textureMaps;
+		std::map<std::string, std::vector<Color> > textureMaps;
 	};
 }
 

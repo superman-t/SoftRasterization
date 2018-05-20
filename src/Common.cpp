@@ -200,7 +200,7 @@ namespace SoftRender
 		outVertex.normal = MultDirMatrix(inVertex.normal, model.Inverse().Transpose());
     }
 
-	Vec3f Reflect(Vec3f& incident, Vec3f& normal)
+	Vec3f Reflect(const Vec3f& incident, const Vec3f& normal)
 	{
 		return incident - normal*(2.0*(normal.Dot(incident)));
 	}

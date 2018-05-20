@@ -49,22 +49,22 @@ void test::testRender()
 		Color(1.0f, 0.5f, 0.31f),
 		Color(0.5f, 0.5f, 0.5f),
 		32.0f);
-// 	render.currentMode = WireFrame;
-// 	Model sphere(std::string("../res/cow.obj"), Vec3f(-20.0f, -20.0, 0.0), m);
-// 	render.DrawModel(sphere);
+ 	render.currentMode = WireFrame;
+ 	Model sphere(std::string("../../res/cow.obj"), Vec3f(-20.0f, -20.0, 0.0), m);
+ 	render.DrawModel(sphere);
 
 	//render.SetLight(light);
 	render.currentMode = Textured;
-	Model cube(std::string("../res/nanosuit/nanosuit.obj"), Vec3f(-5.0f, -5, -5), m);
+	Model cube(std::string("../../res/nanosuit/nanosuit.obj"), Vec3f(-5.0f, -5, -5), m);
 	render.DrawModel(cube);
-
-//Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/
-// 	render.currentMode = WireFrame;
-// 	Model cow(std::string("../res/crystal_maiden/crystal_maiden_econ.fbx"), Vec3f(50, -100, -100), Material());
-// 	render.DrawModel(cow);
-	render.currentMode = Textured;
-	Model nanosuit2(std::string("../res/crystal_maiden/crystal_maiden_econ.fbx"), Vec3f(-50, -175, -150), Material());
- 	render.DrawModel(nanosuit2);
+//
+////Users/acetian/Documents/GitWorkSpace/SoftRasterization/res/
+//// 	render.currentMode = WireFrame;
+//// 	Model cow(std::string("../res/crystal_maiden/crystal_maiden_econ.fbx"), Vec3f(50, -100, -100), Material());
+//// 	render.DrawModel(cow);
+//	render.currentMode = Textured;
+//	Model nanosuit2(std::string("../res/crystal_maiden/crystal_maiden_econ.fbx"), Vec3f(-50, -175, -150), m);
+// 	render.DrawModel(nanosuit2);
 	//  	Model bunny(std::string("res/bunny.obj"), Vec3f(0, 5, 0), Material());
 	//  	render.DrawModel(bunny, false, true);
 

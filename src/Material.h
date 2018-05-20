@@ -13,7 +13,7 @@ namespace SoftRender {
 		std::vector<Texture> diffuseTextures;
 		std::vector<Texture> specularTextures;
 
-		Material(Color& _ambient, Color& _diffuse, Color& _specular, float _shininess):
+		Material(const Color& _ambient, const Color& _diffuse, const Color& _specular, const float _shininess):
 			ambient(_ambient), diffuse(_diffuse), specular(_specular), shininess(_shininess){}
 
 		Material():ambient(Color(1.0, 1.0, 1.0)), diffuse(Color(1.0, 1.0, 1.0)), specular(Color(1.0, 1.0, 1.0)), shininess(32.0f){}
