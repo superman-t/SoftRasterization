@@ -60,6 +60,6 @@ void test::testRender()
 	Model nanosuit2( std::string( "../res/crystal_maiden/crystal_maiden_econ.fbx" ), Vec3f( -50, -175, -150 ), m );
 	render.DrawModel( nanosuit2 );
 
-	SaveTexture(render.frameBuffer, WIDTH, HEIGHT, "screenshot.jpg");
+	SaveTexture(render.frameBuffer, WIDTH, HEIGHT, std::string("screenshot.jpg"));
 }
 

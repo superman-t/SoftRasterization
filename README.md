@@ -3,6 +3,7 @@
 <div  align="center">    
 <img src="./screenshot.jpg" width = "512" height = "383" alt="渲染图" align=left />
 </div>
+  
 
 ### 主要特性 ###
 - 集成assimp库加载模型
@@ -21,8 +22,12 @@
 - cmake跨平台编译，主要实现Windows和MacOS这两个平台
 
 ### 运行方法 ###
-将[工程](https://github.com/superman-t/SoftRasterization)下载到本地解压
+
 ## windows平台 ##
+拉取工程
+```bash 
+  git clone --recurse-submodules https://github.com/superman-t/SoftRasterization
+```
 - 确保装有Cmake，Virtual Studio软件，DirectX
 - 在工程根目录下建立一个build文件夹，
 - 打开Cmake gui界面，source code选择工程根目录，binaries选择上一步建立的build文件夹
@@ -30,20 +35,21 @@
 - 运行工程中的SoftRender项目，将在build下生成渲染出的screenshot.jpg图片
 
 ## Mac OS ##
-    克隆工程到本地
-    git clone https://github.com/superman-t/SoftRasterization
-    进入工程根目录
-    cd SoftRasterization
-    建立工程build文件夹
-    mkdir build
-    cd build
-    cmake ..
-    无bug的话将生成Makefile文件
-    make
-    生成可执行文件
-    ./SoftRender
-    运行后将在当前目录生成渲染出来的screenshot.jpg文件
-
+```bash
+克隆工程到本地
+git clone --recurse-submodules https://github.com/superman-t/SoftRasterization  
+进入工程根目录
+cd SoftRasterization
+建立工程build文件夹
+mkdir build
+cd build
+cmake ..
+无bug的话将生成Makefile文件
+make
+生成可执行文件
+./SoftRender
+运行后将在当前目录生成渲染出来的screenshot.jpg文件
+```
 ### 开发过程手稿 ###
 <div  align="center">    
 <img src="./tmp/0.jpg" width = "280" height = "280" alt="渲染图" align=center />

@@ -61,7 +61,7 @@ namespace SoftRender
 	{
 		return std::max(a, std::max(b, c));
 	}
-	void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string file);
+	void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string& file);
 	bool LoadTexture (Texture &texture, std::string file);
 
 	void VertexShader(Mat4f& model, Mat4f& view, Mat4f& proj, Vertex& inVertex, VertexOut& outVertex);

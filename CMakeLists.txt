@@ -36,8 +36,8 @@ endfunction(PostCopyDir src dst)
 if (MSVC)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT SoftRender)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -EHsc -D_USE_MATH_DEFINES")
+    
     PostCopyDir(${PROJECT_SOURCE_DIR}/res ${PROJECT_SOURCE_DIR}/bin/res)
-
 else()
 	set(CMAKE_CXX_COMPILER      "clang++" )         # 显示指定使用的C++编译器
 	set(CMAKE_CXX_FLAGS   "-g")                     # 调试信息
