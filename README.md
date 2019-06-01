@@ -1,7 +1,7 @@
 # SoftRasterization（[软光栅化工程](https://github.com/superman-t/SoftRasterization)）
 下图为软光栅渲染的出的3D模型，线框模式的牛，纹理模式的Dota2冰女模型，以及纳米粒子模型。
 <div  align="center">    
-<img src="./screenshot.jpg" width = "512" height = "383" alt="渲染图" align=center />
+<img src="./screenshot.jpg" width = "512" height = "383" alt="渲染图" align=left />
 </div>
 
 ### 主要特性 ###
