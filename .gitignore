@@ -6,3 +6,10 @@ CMakeCache.txt
 /Debug
 SoftRender.*
 .git
+/bin
+/build*
+*.obj
+*.cache
+*.tlog
+*.TMP
+

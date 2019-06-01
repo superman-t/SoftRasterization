@@ -14,6 +14,7 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 #include "TextureManager.h"
+#include <algorithm>
 
 
 namespace SoftRender
@@ -24,7 +25,7 @@ namespace SoftRender
     };
     
     //png, jpg, jpeg, bmp, tga
-    void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string file)
+    void SaveTexture(std::vector<Color> &frameBuffer, int width, int height, std::string& file)
     {
         std::string suffix = file.substr(file.find_last_of('.')+1);
         int comp = 3;
