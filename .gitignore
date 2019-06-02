@@ -7,9 +7,3 @@ CMakeCache.txt
 SoftRender.*
 .git
 /bin
-/build*
-*.obj
-*.cache
-*.tlog
-*.TMP
-
