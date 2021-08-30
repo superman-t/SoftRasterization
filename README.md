@@ -50,16 +50,6 @@ make
 ./SoftRender
 运行后将在当前目录生成渲染出来的screenshot.jpg文件
 ```
-### 开发过程手稿 ###
-<div  align="center">    
-<img src="./tmp/0.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/1.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/2.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/3.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/4.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/5.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/6.jpg" width = "280" height = "280" alt="渲染图" align=center />
-</div>
 
 
 
