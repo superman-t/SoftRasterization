@@ -59,8 +59,6 @@ make
 <img src="./tmp/4.jpg" width = "280" height = "280" alt="渲染图" align=center />
 <img src="./tmp/5.jpg" width = "280" height = "280" alt="渲染图" align=center />
 <img src="./tmp/6.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/7.jpg" width = "280" height = "280" alt="渲染图" align=center />
-<img src="./tmp/8.jpg" width = "280" height = "280" alt="渲染图" align=center />
 </div>
 
 
